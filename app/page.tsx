@@ -190,13 +190,17 @@ export default function HomePage() {
           </div>
 
           {/* Right: Asymmetric Image Layout */}
-          <div className="relative h-[300px] min-[420px]:h-[360px] md:col-span-7 md:h-[600px]">
-            <div className="relative z-10 h-64 w-full overflow-hidden rounded-lg border-4 border-[#E8A800]/30 shadow-2xl min-[420px]:h-72 md:h-96">
-              <img alt="Artisan Spice Selection" className="w-full h-full object-cover" src="/masalas/1.Turmeric_Powder.png" />
-            </div>
-            {/* Overlapping element */}
-            <div className="hidden md:block absolute bottom-0 left-0 z-20 w-64 h-80 overflow-hidden rounded-lg shadow-2xl bg-white p-2 border-2 border-[#E8A800]/20">
-              <img alt="Spice Sourcing" className="w-full h-full object-cover rounded" src="/masalas/5.Shahi_Biryani_Masala.png" />
+          <div className="md:col-span-7 md:flex md:items-center">
+            <div className="relative z-10 w-full overflow-hidden rounded-lg border-4 border-[#E8A800]/30 bg-[#fff8ef] shadow-2xl">
+              <Image
+                alt="Veritraa story"
+                src="/mainimg.png"
+                width={2752}
+                height={1536}
+                priority
+                sizes="(min-width: 768px) 58vw, 100vw"
+                className="h-auto w-full object-cover object-center"
+              />
             </div>
           </div>
         </div>
