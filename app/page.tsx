@@ -299,19 +299,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="story-surface mx-2 rounded-3xl px-4 py-14 sm:mx-4 sm:px-6 sm:py-16 md:mx-6 md:px-8 md:py-24">
-        <div className="mx-auto grid max-w-screen-xl grid-cols-1 items-center gap-8 rounded-3xl border border-outline-variant/20 bg-surface-container-low p-6 sm:p-8 md:grid-cols-[1.05fr_0.95fr] md:gap-10 md:p-12">
+      <section className="story-surface mx-2 rounded-3xl px-4 py-12 sm:mx-4 sm:px-6 sm:py-16 md:mx-6 md:px-8 md:py-24">
+        <div className="mx-auto grid max-w-screen-xl grid-cols-1 items-center gap-6 overflow-hidden rounded-3xl border border-[#d9bfa8]/50 bg-gradient-to-br from-[#fff7ee] via-[#fff0e2] to-[#ffe6d0] p-5 shadow-[0_24px_48px_-34px_rgba(92,31,16,0.8)] sm:p-8 md:grid-cols-[1.05fr_0.95fr] md:gap-10 md:p-12">
           <div>
-            <h2 className="mb-4 font-headline text-2xl text-on-background sm:text-3xl md:mb-5 md:text-5xl">
+            <p className="inline-flex rounded-full bg-[#f4d6bd] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7f2f12]">
+              Brand Legacy
+            </p>
+            <h2 className="mt-4 font-headline text-2xl leading-tight text-[#4f1d0c] sm:text-3xl md:text-5xl">
               The Story of Our Company
             </h2>
-            <p className="mb-6 text-sm leading-relaxed text-on-surface-variant sm:text-base md:mb-8 md:text-lg">
-              Born from family spice traditions, Veritraa blends heritage techniques with
-              modern quality control. Every batch is crafted to retain authentic aroma,
-              flavor depth, and kitchen-ready freshness.
+            <p className="mt-4 text-sm leading-relaxed text-[#6a4637] sm:text-base md:text-lg">
+              Born from family spice traditions, Veritraa blends heritage craft with modern quality systems to keep every
+              batch rich in aroma, flavor depth, and kitchen-ready freshness.
             </p>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="rounded-full border border-[#d6a887] bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7f2f12]">
+                Single-origin sourcing
+              </span>
+              <span className="rounded-full border border-[#d6a887] bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7f2f12]">
+                Lab-tested quality
+              </span>
+              <span className="rounded-full border border-[#d6a887] bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7f2f12]">
+                Clean-label promise
+              </span>
+            </div>
+
             <Link
-              className="spice-gradient inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-on-primary transition-transform hover:scale-105 sm:px-8 sm:py-4 sm:text-base"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#7f2f12] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#65250f] sm:px-8 sm:py-4 sm:text-base"
               href="/shop"
             >
               Explore Our Range
@@ -319,12 +334,13 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="overflow-hidden rounded-2xl shadow-xl">
+          <div className="relative overflow-hidden rounded-2xl shadow-xl">
             <img
               alt="Veritraa heritage"
               className="h-full w-full object-cover"
               src="/quality-section.png"
             />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#4f1d0c]/40 via-transparent to-transparent" />
           </div>
         </div>
       </section>
@@ -338,7 +354,27 @@ export default function HomePage() {
             <h2 className="font-headline text-2xl sm:text-3xl">What Our Patrons Say</h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-8">
+          <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:hidden">
+            {testimonials.map((testimonial) => (
+              <div
+                key={testimonial.name}
+                className="min-w-[86%] snap-start rounded-[1.35rem] border border-[#dcc8b8]/65 bg-[#fffaf4] p-6 shadow-[0_18px_30px_-28px_rgba(52,26,14,0.85)]"
+              >
+                <p className="mb-5 text-sm italic leading-7 text-[#4d3328]">{`"${testimonial.quote}"`}</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ead7c8] font-bold text-[#7f2f12]">
+                    {testimonial.initial}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[#4f1d0c]">{testimonial.name}</p>
+                    <p className="text-xs text-[#7f5a4a]">{testimonial.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden grid-cols-1 gap-4 sm:grid sm:grid-cols-2 md:grid-cols-3 md:gap-8">
             {testimonials.map((testimonial) => (
               <div
                 key={testimonial.name}
