@@ -34,10 +34,20 @@ export default function ShopPage() {
       </section>
 
       <section className="story-surface mx-2 rounded-3xl py-6 sm:mx-4 sm:py-7 md:mx-6 md:py-8">
-        <div className="mx-auto grid max-w-screen-2xl grid-cols-2 gap-3 px-4 min-[520px]:grid-cols-3 sm:gap-5 sm:px-6 md:px-8 lg:grid-cols-4 xl:grid-cols-5">
-        {shopProducts.map((product) => (
-          <ProductCard key={product.name} product={product} variant="shop" />
-        ))}
+        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 md:px-8">
+          <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:hidden">
+            {shopProducts.map((product) => (
+              <div key={product.name} className="min-w-[78%] snap-start">
+                <ProductCard product={product} variant="shop" />
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden grid-cols-2 gap-3 min-[520px]:grid-cols-3 sm:grid sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
+            {shopProducts.map((product) => (
+              <ProductCard key={product.name} product={product} variant="shop" />
+            ))}
+          </div>
         </div>
       </section>
 

@@ -127,8 +127,46 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Mobile Story / Vision / Mission Slider */}
+      <section className="story-surface mx-2 rounded-3xl px-4 py-8 md:hidden" id="brand-promise">
+        <div className="mb-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#a04100]">Veritraa Core</p>
+          <h2 className="mt-2 font-serif text-3xl text-[#8b1d1d]">Our Story</h2>
+          <p className="mt-2 text-sm text-[#6f4b3f]">Swipe cards to view our story, vision, and mission.</p>
+        </div>
+
+        <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1">
+          <article className="min-w-[88%] snap-center rounded-2xl border border-[#b66e37]/40 bg-gradient-to-br from-[#2f0f05] via-[#64250d] to-[#a04100] p-5 text-[#fff4e8] shadow-[0_18px_40px_-24px_rgba(82,28,4,0.9)]">
+            <p className="inline-flex rounded-full bg-[#ffd5ac]/20 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffd8b2]">Our Story</p>
+            <h3 className="mt-3 font-serif text-2xl font-bold leading-tight text-white">Purity in every blend</h3>
+            <p className="mt-3 text-sm leading-6 text-[#ffe8d5]">
+              At Veritraa, we believe the soul of Indian cooking lies in pure spices. We source directly from farmers
+              and pack hygienically without additives or fillers.
+            </p>
+          </article>
+
+          <article className="min-w-[88%] snap-center rounded-2xl border border-[#8b1d1d]/45 bg-gradient-to-br from-[#1d1129] via-[#4b1539] to-[#8b1d1d] p-5 text-[#fbe7ef] shadow-[0_18px_40px_-24px_rgba(58,12,30,0.95)]">
+            <p className="inline-flex rounded-full bg-[#f8c5d9]/20 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffd5e4]">Vision</p>
+            <h3 className="mt-3 font-serif text-2xl font-bold leading-tight text-white">Authentic origins, global trust</h3>
+            <p className="mt-3 text-sm leading-6 text-[#ffe6f0]">
+              To build a globally respected Indian brand rooted in authentic origins and defined by uncompromised
+              purity.
+            </p>
+          </article>
+
+          <article className="min-w-[88%] snap-center rounded-2xl border border-[#0f6f65]/45 bg-gradient-to-br from-[#042725] via-[#0f3e3b] to-[#136f63] p-5 text-[#e4fffa] shadow-[0_18px_40px_-24px_rgba(4,42,39,0.95)]">
+            <p className="inline-flex rounded-full bg-[#b8fff3]/20 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d4fff8]">Mission</p>
+            <h3 className="mt-3 font-serif text-2xl font-bold leading-tight text-white">Clean-label for modern kitchens</h3>
+            <p className="mt-3 text-sm leading-6 text-[#dbfff7]">
+              To source, craft, and deliver traceable spices that meet modern quality standards while building
+              women-led supply chains.
+            </p>
+          </article>
+        </div>
+      </section>
+
       {/* Our Story Section - New Design */}
-      <section className="story-surface relative mx-2 flex items-center overflow-hidden rounded-3xl px-4 pb-16 pt-10 sm:mx-4 sm:px-6 md:mx-6 md:min-h-screen md:px-12 md:pb-24 md:pt-12" id="brand-promise">
+      <section className="story-surface relative mx-2 hidden items-center overflow-hidden rounded-3xl px-4 pb-16 pt-10 sm:mx-4 sm:px-6 md:mx-6 md:flex md:min-h-screen md:px-12 md:pb-24 md:pt-12">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-8 sm:gap-10 md:grid-cols-12 md:gap-12">
           {/* Left: Content */}
           <div className="z-10 space-y-6 md:col-span-5 md:space-y-8">
@@ -165,7 +203,7 @@ export default function HomePage() {
       </section>
 
       {/* Vision & Mission Section */}
-      <section className="story-surface relative mx-2 rounded-3xl px-4 py-16 sm:mx-4 sm:px-6 sm:py-20 md:mx-6 md:px-12 md:py-32">
+      <section className="story-surface relative mx-2 hidden rounded-3xl px-4 py-16 sm:mx-4 sm:px-6 sm:py-20 md:mx-6 md:block md:px-12 md:py-32">
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-2 md:gap-24">
             {/* Vision Block */}
@@ -235,7 +273,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 min-[520px]:grid-cols-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:hidden">
+            {bestSellerProducts.map((product) => (
+              <div key={product.name} className="min-w-[78%] snap-start">
+                <ProductCard product={product} variant="preview" />
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden grid-cols-2 gap-3 min-[520px]:grid-cols-3 sm:grid sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
             {bestSellerProducts.map((product) => (
               <ProductCard key={product.name} product={product} variant="preview" />
             ))}
