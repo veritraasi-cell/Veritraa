@@ -28,11 +28,13 @@ export type FeaturedProduct = {
 };
 
 export type ShopProduct = {
+  slug: string;
+  shopifyHandle?: string;
   name: string;
   description: string;
-  price: string;
   image: string;
   sizes: string[];
+  highlights: string[];
   tag?: {
     icon: string;
     label: string;
@@ -72,6 +74,8 @@ export type StoreLocation = {
   timings: string;
   contact: string;
 };
+
+export const brochureDownloadHref = '/brochures/Veritraa-Brochure-1-Final.pdf';
 
 export const navLinks: ReadonlyArray<NavLink> = [
   { label: 'Home', href: '/' },
@@ -171,133 +175,155 @@ export const shopCategories: ReadonlyArray<string> = [
 
 export const shopProducts: ReadonlyArray<ShopProduct> = [
   {
+    slug: 'dry-red-chilli-powder-kashmiri-lal',
     name: 'Dry Red Chilli Powder (Kashmiri Lal)',
-    description: 'Deep red color with balanced heat for rich gravies.',
-    price: 'Rs. 700',
+    description: 'Naturally rich, vibrant authentic red color with smoky flavor.',
     image: '/masalas/6.Kashmirilal.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Bright color', 'Balanced heat', 'Rich gravies'],
     tag: { icon: 'workspace_premium', label: 'Top Seller' },
   },
   {
-    name: 'Dry Red Chilli Powder (Lai Tikhat)',
-    description: 'Bold and fiery chilli powder for spicy regional recipes.',
-    price: 'Rs. 600',
+    slug: 'dry-red-chilli-powder-lal-tikhat',
+    name: 'Dry Red Chilli Powder (Lal Tikhat)',
+    description: 'Made from premium, high-heat red chillies for bold taste.',
     image: '/masalas/4.Tikhalal.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Strong, fiery spice', 'Curries and gravies', 'Bold taste'],
   },
   {
+    slug: 'dry-red-chilli-powder-tej',
     name: 'Dry Red Chilli Powder (Tej)',
-    description: 'Intense hot chilli profile for high-heat cooking.',
-    price: 'Rs. 500',
+    description: 'Strong, fiery spice level with carefully roasted spice base.',
     image: '/masalas/tej.jpeg',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Sharp heat', 'Deep spice strength', 'Bold finish'],
   },
   {
+    slug: 'kanda-lasun-chutney',
     name: 'Kanda Lasun Chutney',
-    description: 'Authentic Maharashtrian garlic-onion chutney blend.',
-    price: 'Rs. 600',
+    description: 'Traditional Maharashtrian recipe made with premium onions and garlic.',
     image: '/masalas/3.Kanda_Lasun_chutney.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Balanced spice', 'Garlic and onion', 'Traditional recipe'],
   },
   {
+    slug: 'turmeric-powder',
     name: 'Turmeric Powder',
-    description: 'Premium turmeric with bright color and earthy aroma.',
-    price: 'Rs. 400',
+    description: 'Naturally strong curcumin profile, multi-region blended for quality.',
     image: '/masalas/1.Turmeric_Powder.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Lab-tested purity', 'No artificial colours', 'Freshness-sealed'],
   },
   {
+    slug: 'coriander-powder',
     name: 'Coriander Powder',
-    description: 'Citrusy, warm coriander powder for daily cooking.',
-    price: 'Rs. 300',
+    description: 'Fresh, earthy flavour stone-ground from sun-dried coriander seeds.',
     image: '/masalas/10.Coriandor_Powder.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Uniform texture', 'Clean-label processing', 'Consistent batch quality'],
   },
   {
+    slug: 'cumin-powder',
     name: 'Cumin Powder',
-    description: 'Robust cumin aroma with warm, nutty flavor.',
-    price: 'Rs. 600',
+    description: 'Strong natural aroma with precision-ground texture and freshness-sealed packing.',
     image: '/masalas/11.Cumin_Powder.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['No additives', 'Precision-ground', 'Freshness-sealed'],
   },
   {
+    slug: 'shahi-garam-masala',
     name: 'Shahi Garam Masala',
-    description: 'Royal garam masala blend with layered whole-spice notes.',
-    price: 'Rs. 700',
+    description: 'Refined whole-spice blend crafted to enhance curries, gravies, and festive dishes.',
     image: '/masalas/2.Shahi_garam_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Depth and warmth', 'Consistent flavor', 'Royal-style blend'],
   },
   {
+    slug: 'sabji-masala',
     name: 'Sabji Masala',
-    description: 'Everyday vegetable masala for homestyle curries.',
-    price: 'Rs. 500',
+    description: 'Premium blend ideal for all types of vegetable (subji) preparations.',
     image: '/masalas/2.Shahi_garam_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Dry and gravy dishes', 'Vegetable cooking', 'Balanced flavour'],
   },
   {
+    slug: 'chicken-masala',
     name: 'Chicken Masala',
-    description: 'Savory chicken masala blend with warming spices.',
-    price: 'Rs. 700',
+    description: 'Premium blend of carefully selected spices for chicken curries, gravies, and dry preparations.',
     image: '/masalas/7.Chiken_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Balanced flavour', 'Rich aroma', 'Warmth'],
   },
   {
+    slug: 'mutton-masala',
     name: 'Mutton Masala',
-    description: 'Rich and robust spice blend for mutton gravies.',
-    price: 'Rs. 800',
+    description: 'Specially crafted for mutton curries and gravies with rich, bold flavor.',
     image: '/masalas/8.Mutton_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Deep aroma', 'Slow cooking', 'Dhaba-style taste'],
   },
   {
+    slug: 'shahi-biryani-masala',
     name: 'Shahi Biryani Masala',
-    description: 'Fragrant biryani blend for celebratory rice dishes.',
-    price: 'Rs. 1,000',
+    description: 'An aromatic blend designed to elevate biryani with balanced spice and fragrance.',
     image: '/masalas/5.Shahi_Biryani_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Layered aroma', 'Balanced spice', 'Authentic biryani'],
   },
   {
+    slug: 'chaat-masala',
     name: 'Chaat Masala',
-    description: 'Tangy and savory finishing masala for snacks and fruits.',
-    price: 'Rs. 420',
+    description: 'Tangy, zesty, and slightly spicy flavour profile for snacks and fruits.',
     image: '/masalas/15.Chaat_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Chaats and salads', 'Slightly spicy', 'Refreshing kick'],
   },
   {
+    slug: 'shahi-paneer-masala',
     name: 'Shahi Paneer Masala',
-    description: 'Creamy paneer curry masala with rich aromatic balance.',
-    price: 'Rs. 600',
+    description: 'Premium spice blend crafted for rich, royal-style paneer dishes and creamy gravies.',
     image: '/masalas/shahi%20paneer%20masala.jpeg',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Shahi Paneer', 'Paneer Butter Masala', 'Creamy gravies'],
   },
   {
+    slug: 'fish-masala',
     name: 'Fish Masala',
-    description: 'Coastal-style fish masala with bright and spicy notes.',
-    price: 'Rs. 540',
+    description: 'Authentic Malvani-style blend with carefully roasted coastal spices.',
     image: '/masalas/14.Malvani_Fish_Fry_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Balanced heat and aroma', 'No artificial additives', 'Coastal flavour'],
   },
   {
+    slug: 'goda-masala',
     name: 'Goda Masala',
-    description: 'Classic Maharashtrian sweet-spiced goda masala.',
-    price: 'Rs. 700',
+    description: 'Known for its mildly sweet, roasted character and aromatic warmth.',
     image: '/masalas/13.Goda_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Balanced sweetness', 'Roasted character', 'Aromatic warmth'],
   },
   {
+    slug: 'kala-masala',
     name: 'Kala Masala',
-    description: 'Dark roasted masala with smoky Kolhapuri depth.',
-    price: 'Rs. 900',
+    description: 'Known for its intense roasted profile and layered depth.',
     image: '/masalas/12.Kala_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Layered depth', 'Authentic character', 'Rich Maharashtrian flavour'],
   },
   {
+    slug: 'misal-usal-masala',
     name: 'Misal / Usal Masala',
-    description: 'Signature spicy blend for authentic misal and usal.',
-    price: 'Rs. 1,000',
+    description: 'Inspired by Kolhapur’s iconic flavours with sharp heat and deep spice strength.',
     image: '/masalas/9.Misal_Masala.png',
     sizes: ['100 GM', '250 GM', '500 GM', '1 KG'],
+    highlights: ['Carefully roasted spice base', 'Balanced intensity', 'Signature misal flavour'],
   },
 ];
+
+export function getShopProductBySlug(slug: string) {
+  return shopProducts.find((product) => product.slug === slug);
+}
 
 export const testimonials: ReadonlyArray<Testimonial> = [
   {

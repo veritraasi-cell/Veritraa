@@ -26,6 +26,46 @@ export default function HomePage() {
 
   return (
     <>
+      <section className="relative isolate hidden min-h-[calc(100vh-5.5rem)] overflow-hidden px-4 pt-4 sm:px-6 sm:pt-6 md:block md:px-8">
+        <div className="absolute inset-0">
+          <img
+            alt="Cinematic close-up of exotic spices"
+            className="h-full w-full object-cover object-center"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbYIa1YqPkAdvxpJljEpT6qO4A5dR4ceCvHAkLT3AuTzpMSk_PqAn4NaIf9Zm6zEMNFiukI_DyntN93ZmHBUQyWzjP8KyKrPOq4Hrk2GNgVxf3nTNFIHr3435khSXtkF88a0WN5DJ75YQtlKRiCDYjR3Tok5-2_roRwTq6MP0YjkOhUmDsiqz48Zl4Vhcchj_9AXDyc-ZVKni7uLdYHBNshLo-pScZtHE74OMyPjF46fMupEzx6oYWCbzLdEPGqb5ti6Yt5MGBHWXY"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(23,53,9,0.4)_0%,rgba(23,53,9,0)_40%,rgba(23,53,9,0)_60%,rgba(23,53,9,0.6)_100%)]" />
+        </div>
+
+        <Link href="/" className="absolute left-5 top-5 z-20 flex items-center gap-3 sm:left-6 sm:top-6">
+          <Image
+            alt="Veritraa logo"
+            src="/logo.jpeg"
+            width={128}
+            height={128}
+            priority
+            className="h-24 w-24 rounded-full object-cover shadow-[0_22px_44px_-20px_rgba(0,0,0,0.6)] sm:h-28 sm:w-28 md:h-32 md:w-32"
+          />
+        </Link>
+
+        <div className="relative z-10 flex min-h-[calc(100vh-6.5rem)] flex-col items-center justify-center text-center">
+          <h1 className="max-w-4xl font-headline text-4xl leading-[1.1] text-white drop-shadow-2xl sm:text-5xl md:text-7xl lg:text-8xl">
+            The World&apos;s Finest Spices &amp; Dry Fruits
+          </h1>
+        </div>
+
+        <div className="absolute bottom-8 left-12 hidden lg:block">
+          <p className="font-headline text-sm uppercase tracking-[0.3em] text-white/40 [writing-mode:vertical-lr]">
+            Veritraa Heritage
+          </p>
+        </div>
+
+        <div className="absolute bottom-8 right-12 hidden lg:block">
+          <p className="font-headline text-sm uppercase tracking-[0.3em] text-white/40 [writing-mode:vertical-lr]">
+            Est. MMXXIV
+          </p>
+        </div>
+      </section>
+
       <MobileHeroCarousel />
 
       <section className="story-surface mx-auto mt-5 max-w-screen-2xl rounded-3xl px-4 py-14 sm:px-6 sm:py-16 md:mt-6 md:px-8 md:py-24" id="collections">
@@ -45,7 +85,7 @@ export default function HomePage() {
 
         <div className="no-scrollbar grid grid-flow-col auto-cols-[46%] gap-3 overflow-x-auto pb-1 sm:grid-cols-3 sm:auto-cols-auto sm:overflow-visible sm:pb-0 sm:gap-5 lg:grid-cols-4">
           {shopProducts.slice(0, 4).map((product) => (
-            <ProductCard key={product.name} product={product} variant="preview" />
+            <ProductCard key={product.name} href={`/shop/${product.slug}`} product={product} variant="preview" />
           ))}
         </div>
 
@@ -56,26 +96,6 @@ export default function HomePage() {
           >
             Explore Full Collection
             <ArrowRight size={18} />
-          </Link>
-        </div>
-      </section>
-
-      {/* CTA Buttons Section */}
-      <section className="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 sm:py-14 md:px-8 md:py-20">
-        <div className="flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center sm:gap-6 md:gap-8">
-          <Link
-            href="/shop"
-            className="spice-gradient inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-sm font-bold text-white shadow-2xl shadow-[#ff9762]/30 transition-all duration-300 hover:scale-105 hover:shadow-[#ff9762]/50 md:px-12 md:py-5 md:text-base"
-          >
-            Shop Now
-            <ArrowRight size={20} />
-          </Link>
-          <Link
-            href="#brand-promise"
-            className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#8b1d1d] bg-[#8b1d1d]/10 px-8 py-3 text-sm font-bold text-[#8b1d1d] transition-all duration-300 hover:bg-[#8b1d1d]/20 md:px-12 md:py-5 md:text-base"
-          >
-            Our Story
-            <Sparkles size={20} />
           </Link>
         </div>
       </section>
@@ -355,14 +375,14 @@ export default function HomePage() {
           <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:hidden">
             {bestSellerProducts.map((product) => (
               <div key={product.name} className="min-w-[78%] snap-start">
-                <ProductCard product={product} variant="preview" />
+                <ProductCard href={`/shop/${product.slug}`} product={product} variant="preview" />
               </div>
             ))}
           </div>
 
           <div className="hidden grid-cols-2 gap-3 min-[520px]:grid-cols-3 sm:grid sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
             {bestSellerProducts.map((product) => (
-              <ProductCard key={product.name} product={product} variant="preview" />
+              <ProductCard key={product.name} href={`/shop/${product.slug}`} product={product} variant="preview" />
             ))}
           </div>
 
