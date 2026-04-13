@@ -18,11 +18,11 @@ export default function Navbar(_: Readonly<NavbarProps>) {
       <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-3 px-4 py-2.5 sm:px-5 sm:py-3 md:gap-4 md:px-8 md:py-4">
         <Link href="/" className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80 sm:gap-3">
           <Image 
-            src="/veritraa.png" 
-            alt="Veritraa" 
-            height={100} 
-            width={100}
-            className="h-12 w-auto sm:h-14 md:h-16"
+            src="/logo.png" 
+            alt="Veritraa Enterprises" 
+            height={96} 
+            width={96}
+            className="h-11 w-11 rounded-full object-cover shadow-sm sm:h-13 sm:w-13 md:h-14 md:w-14"
             priority
           />
           <div className="hidden sm:flex flex-col gap-0.5">

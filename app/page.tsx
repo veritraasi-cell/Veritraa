@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Leaf, Sparkles, Star } from 'lucide-react';
+import MobileHeroCarousel from '@/components/site/MobileHeroCarousel';
 import ProductCard from '@/components/site/ProductCard';
 import {
   homeBenefits,
-  homeCollections,
   testimonials,
   shopProducts,
 } from '@/src/data/mockData';
@@ -26,26 +26,7 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="story-surface relative mx-2 mt-3 flex min-h-[50vh] w-auto items-center justify-center overflow-hidden rounded-3xl sm:mx-4 sm:min-h-[65vh] md:mx-6 md:min-h-[calc(100vh-5.5rem)]">
-        <Image
-          src="/veritraaimg_page-0001.jpg"
-          alt=""
-          fill
-          aria-hidden="true"
-          sizes="100vw"
-          className="object-cover object-center opacity-35"
-        />
-        <div className="absolute inset-0 bg-[#f6efe4]/35" />
-        <Image
-          src="/veritraaimg_page-0001.jpg"
-          alt="Veritraa hero banner"
-          width={2231}
-          height={1775}
-          priority
-          sizes="100vw"
-          className="relative z-10 h-auto w-auto max-w-full max-h-[50vh] sm:max-h-[65vh] md:max-h-[calc(100vh-5.5rem)]"
-        />
-      </section>
+      <MobileHeroCarousel />
 
       <section className="story-surface mx-auto mt-5 max-w-screen-2xl rounded-3xl px-4 py-14 sm:px-6 sm:py-16 md:mt-6 md:px-8 md:py-24" id="collections">
         <div className="mb-10 sm:mb-12 md:mb-16">
@@ -96,6 +77,100 @@ export default function HomePage() {
             Our Story
             <Sparkles size={20} />
           </Link>
+        </div>
+      </section>
+
+      <section className="story-surface mx-2 rounded-3xl px-4 py-10 sm:mx-4 sm:px-6 sm:py-14 md:mx-6 md:px-8 md:py-20">
+        <div className="mx-auto max-w-screen-2xl">
+          <div className="mb-8 flex flex-col gap-3 sm:mb-10 md:mb-12 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#a04100]">Brand Gallery</p>
+              <h2 className="mt-2 font-headline text-2xl text-on-background sm:text-3xl md:text-4xl">
+                A closer look at Veritraa
+              </h2>
+            </div>
+            <p className="max-w-xl text-sm leading-6 text-on-surface-variant sm:text-base">
+              A responsive collage showing the people, product, and brand story, designed to look balanced on both
+              phones and larger screens.
+            </p>
+          </div>
+
+          <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:hidden">
+            <div className="min-w-full snap-center">
+              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
+                <Image
+                  src="/WhatsApp Image 2026-04-13 at 16.12.20.jpeg"
+                  alt="Veritraa brand showcase 1"
+                  fill
+                  sizes="100vw"
+                  className="object-contain object-center"
+                />
+                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
+              </div>
+            </div>
+
+            <div className="min-w-full snap-center">
+              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
+                <Image
+                  src="/WhatsApp Image 2026-04-13 at 16.12.28.jpeg"
+                  alt="Veritraa brand showcase 2"
+                  fill
+                  sizes="100vw"
+                  className="object-contain object-center"
+                />
+                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
+              </div>
+            </div>
+
+            <div className="min-w-full snap-center">
+              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
+                <Image
+                  src="/WhatsApp Image 2026-04-13 at 16.12.39.jpeg"
+                  alt="Veritraa brand showcase 3"
+                  fill
+                  sizes="100vw"
+                  className="object-contain object-center"
+                />
+                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden grid-cols-1 gap-4 md:grid md:grid-cols-3 md:gap-5">
+            <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3 md:col-span-2 md:aspect-[7/9]">
+              <Image
+                src="/WhatsApp Image 2026-04-13 at 16.12.20.jpeg"
+                alt="Veritraa brand showcase 1"
+                fill
+                sizes="(min-width: 768px) 66vw, 100vw"
+                className="object-contain object-center"
+              />
+              <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
+            </div>
+
+            <div className="grid gap-4 md:grid-rows-2">
+              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
+                <Image
+                  src="/WhatsApp Image 2026-04-13 at 16.12.28.jpeg"
+                  alt="Veritraa brand showcase 2"
+                  fill
+                  sizes="(min-width: 768px) 33vw, 100vw"
+                  className="object-contain object-center"
+                />
+                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
+              </div>
+              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
+                <Image
+                  src="/WhatsApp Image 2026-04-13 at 16.12.39.jpeg"
+                  alt="Veritraa brand showcase 3"
+                  fill
+                  sizes="(min-width: 768px) 33vw, 100vw"
+                  className="object-contain object-center"
+                />
+                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

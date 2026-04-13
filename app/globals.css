@@ -4,7 +4,9 @@
 
 @layer base {
   :root {
-    --story-bg-image: url('/veritraaimg_page-0001.jpg');
+    --story-bg-image: radial-gradient(circle at top left, rgba(255, 173, 96, 0.24), transparent 28%),
+      radial-gradient(circle at top right, rgba(143, 53, 15, 0.16), transparent 30%),
+      radial-gradient(circle at bottom center, rgba(76, 106, 52, 0.12), transparent 35%);
   }
 }
 
@@ -29,9 +31,9 @@
   body {
     margin: 0;
     padding: 0;
-    background-color: #f7f2ea;
+    background-color: #f7efe3;
     background-image:
-      linear-gradient(180deg, rgba(251, 245, 235, 0.95), rgba(250, 245, 238, 0.9)),
+      linear-gradient(180deg, rgba(252, 245, 234, 0.98), rgba(244, 230, 208, 0.92)),
       var(--story-bg-image);
     background-position: center;
     background-size: cover;
@@ -74,17 +76,18 @@
   }
 
   .glass-nav {
-    background: rgba(250, 246, 239, 0.96);
+    background: rgba(253, 243, 229, 0.96);
+    backdrop-filter: blur(14px);
   }
 
   .content-frame {
-    background: rgba(250, 246, 239, 0.86);
+    background: linear-gradient(180deg, rgba(252, 243, 231, 0.88), rgba(247, 233, 212, 0.84));
   }
 
   .story-surface {
-    background: rgba(255, 252, 246, 0.9);
-    border: 1px solid rgba(219, 194, 176, 0.48);
-    box-shadow: 0 12px 32px -28px rgba(72, 31, 12, 0.35);
+    background: linear-gradient(180deg, rgba(255, 248, 240, 0.96), rgba(246, 230, 207, 0.92));
+    border: 1px solid rgba(217, 183, 148, 0.54);
+    box-shadow: 0 12px 32px -28px rgba(123, 64, 21, 0.35);
   }
 
   .no-scrollbar {
@@ -176,17 +179,17 @@
   height: 10px;
 }
 
-::-webkit-scrollbar-track {
-  background: #f4f3f1;
-}
+  ::-webkit-scrollbar-track {
+    background: #f3e4d2;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #a04100, #ff9762);
-  border-radius: 9999px;
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.3);
-}
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #8f350f, #f0a15f);
+    border-radius: 9999px;
+    box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.3);
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #7a3000, #e87a48);
-}
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #6f2507, #dc8143);
+  }
 

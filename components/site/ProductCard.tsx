@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import type { FeaturedProduct, ShopProduct } from '@/src/data/mockData';
 
 interface ProductCardProps {
@@ -38,41 +37,38 @@ export default function ProductCard({
     const shopProduct = product as ShopProduct;
 
     return (
-      <div className="group flex h-full flex-col overflow-hidden rounded-[1.15rem] border border-outline-variant/35 bg-surface-container-lowest shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10 sm:rounded-2xl">
-        <div className="relative aspect-[5/6] w-full overflow-hidden bg-surface-container-low sm:aspect-[3/4]">
+      <div className="group flex h-full flex-col overflow-hidden rounded-[1.45rem] border border-[#d9b98e]/55 bg-gradient-to-b from-[#fffaf3] via-[#f8ecdd] to-[#f0dcc3] shadow-[0_18px_36px_-28px_rgba(112,56,18,0.55)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_50px_-26px_rgba(112,56,18,0.55)] sm:rounded-[1.75rem]">
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#f6ead7] sm:aspect-[3/4]">
           <img
             alt={shopProduct.name}
-            className="h-full w-full object-contain"
+            className="h-full w-full object-cover object-[center_16%] transition-transform duration-700 group-hover:scale-105"
             src={shopProduct.image}
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#4f2410]/18 via-transparent to-transparent" />
           {shopProduct.tag ? (
-            <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-tertiary px-2 py-1 text-[10px] font-bold text-on-tertiary shadow sm:left-4 sm:top-4 sm:px-3 sm:text-xs">
+            <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-white/40 bg-[#8f350f]/92 px-3 py-1 text-[10px] font-bold text-white shadow-lg shadow-[#7d2d0c]/20 backdrop-blur sm:left-4 sm:top-4 sm:px-3.5 sm:text-xs">
               <span className="material-symbols-outlined text-xs leading-none sm:text-sm">{shopProduct.tag.icon}</span>
               {shopProduct.tag.label}
             </div>
           ) : null}
         </div>
-        <div className="flex flex-1 flex-col p-3 sm:p-5">
-          <div className="mb-2 sm:mb-3">
-            <h3 className="mb-1 min-h-[2.5rem] font-headline text-sm leading-tight text-on-background min-[400px]:text-base sm:min-h-[48px] sm:text-xl sm:leading-[1.05]">
+        <div className="flex flex-1 flex-col p-4 sm:p-5">
+          <div className="mb-3">
+            <div className="mb-2 h-1.5 w-10 rounded-full bg-gradient-to-r from-[#8f350f] via-[#f0a15f] to-[#d8b266]" />
+            <h3 className="mb-2 min-h-[2.8rem] font-headline text-base leading-tight text-[#4b2616] min-[400px]:text-[1.05rem] sm:min-h-[52px] sm:text-xl sm:leading-[1.05]">
               {shopProduct.name}
             </h3>
-            <p className="hidden text-[11px] leading-4 text-on-surface-variant opacity-70 min-[400px]:block sm:text-sm sm:leading-5">
+            <p className="hidden text-[11px] leading-5 text-on-surface-variant/90 min-[400px]:block sm:text-sm sm:leading-5">
               {shopProduct.description}
             </p>
           </div>
-          <div className="mt-auto">
-            <div className="flex items-center justify-between">
-              <span className="font-headline text-base leading-none text-on-background min-[400px]:text-lg sm:text-2xl">
-                {shopProduct.price}
-              </span>
-              <Link
-                href="/shop"
-                className="spice-gradient rounded-full p-2 text-on-primary shadow-lg shadow-primary/15 transition-transform hover:scale-105 sm:p-3"
-              >
-                <span className="material-symbols-outlined block text-base leading-none sm:text-xl">add_shopping_cart</span>
-              </Link>
-            </div>
+          <div className="mt-auto flex items-center justify-between border-t border-white/40 pt-3">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8f350f]">
+              Crafted blend
+            </span>
+            <span className="rounded-full bg-white/60 px-3 py-1 text-[11px] font-semibold text-[#6f2507] shadow-sm">
+              View details
+            </span>
           </div>
         </div>
       </div>
@@ -84,16 +80,17 @@ export default function ProductCard({
 
     return (
       <div className="group w-full min-w-0">
-        <div className="overflow-hidden rounded-2xl border border-outline-variant/15 bg-surface-container-lowest shadow-sm transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-primary/10">
-          <div className="relative aspect-square">
-            <img
-              alt={featuredProduct.name}
-              className="h-full w-full object-cover"
-              src={featuredProduct.image}
-            />
-            {featuredProduct.badge ? (
-              <span className="absolute left-4 top-4 rounded-full bg-tertiary px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow">
-                {featuredProduct.badge}
+      <div className="overflow-hidden rounded-[1.45rem] border border-[#d9b98e]/40 bg-gradient-to-b from-[#fffaf3] via-[#f8ecdd] to-[#efd6b6] shadow-[0_18px_36px_-30px_rgba(112,56,18,0.45)] transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_28px_50px_-26px_rgba(112,56,18,0.45)]">
+        <div className="relative aspect-square">
+          <img
+            alt={featuredProduct.name}
+            className="h-full w-full object-cover object-[center_16%] transition-transform duration-700 group-hover:scale-105"
+            src={featuredProduct.image}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#4f2410]/18 via-transparent to-transparent" />
+          {featuredProduct.badge ? (
+            <span className="absolute left-4 top-4 rounded-full border border-white/40 bg-[#8f350f]/92 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg shadow-[#7d2d0c]/20 backdrop-blur">
+              {featuredProduct.badge}
               </span>
             ) : null}
           </div>
@@ -102,11 +99,10 @@ export default function ProductCard({
               {renderStars(featuredProduct.rating)}
               <span className="ml-1 text-xs text-on-surface-variant">{featuredProduct.reviews}</span>
             </div>
-            <h3 className="mb-1 font-headline text-lg">{featuredProduct.name}</h3>
-            <p className="font-bold text-primary">{featuredProduct.price}</p>
-            <button className="mt-4 w-full rounded-full border border-primary/60 py-3 font-bold text-primary transition-colors hover:bg-primary hover:text-white">
-              Add to Cart
-            </button>
+            <h3 className="mb-2 font-headline text-lg text-[#4b2616]">{featuredProduct.name}</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8f350f]">
+              Heritage selection
+            </p>
           </div>
         </div>
       </div>
@@ -116,26 +112,28 @@ export default function ProductCard({
   const shopProduct = product as ShopProduct;
 
   return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-[1.15rem] border border-outline-variant/35 bg-surface-container-lowest shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10 sm:rounded-2xl">
-      <div className="relative aspect-[5/6] w-full overflow-hidden bg-surface-container-low sm:aspect-[3/4]">
+    <div className="group flex h-full flex-col overflow-hidden rounded-[1.45rem] border border-[#d9b98e]/55 bg-gradient-to-b from-[#fffaf3] via-[#f8ecdd] to-[#f0dcc3] shadow-[0_18px_36px_-28px_rgba(112,56,18,0.55)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_50px_-26px_rgba(112,56,18,0.55)] sm:rounded-[1.75rem]">
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#f6ead7] sm:aspect-[3/4]">
         <img
           alt={shopProduct.name}
-          className="h-full w-full object-contain"
+          className="h-full w-full object-cover object-[center_16%] transition-transform duration-700 group-hover:scale-105"
           src={shopProduct.image}
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#4f2410]/18 via-transparent to-transparent" />
         {shopProduct.tag ? (
-          <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-tertiary px-2 py-1 text-[10px] font-bold text-on-tertiary shadow sm:left-4 sm:top-4 sm:px-3 sm:text-xs">
+          <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-white/40 bg-[#8f350f]/92 px-3 py-1 text-[10px] font-bold text-white shadow-lg shadow-[#7d2d0c]/20 backdrop-blur sm:left-4 sm:top-4 sm:px-3.5 sm:text-xs">
             <span className="material-symbols-outlined text-xs leading-none sm:text-sm">{shopProduct.tag.icon}</span>
             {shopProduct.tag.label}
           </div>
         ) : null}
       </div>
-      <div className="flex flex-1 flex-col p-3 sm:p-5">
-        <div className="mb-2 sm:mb-3">
-          <h3 className="mb-1 min-h-[2.5rem] font-headline text-sm leading-tight text-on-background min-[400px]:text-base sm:min-h-[56px] sm:text-[1.45rem] sm:leading-[1.06]">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <div className="mb-3">
+          <div className="mb-2 h-1.5 w-10 rounded-full bg-gradient-to-r from-[#8f350f] via-[#f0a15f] to-[#d8b266]" />
+          <h3 className="mb-2 min-h-[2.8rem] font-headline text-base leading-tight text-[#4b2616] min-[400px]:text-[1.05rem] sm:min-h-[56px] sm:text-[1.45rem] sm:leading-[1.06]">
             {shopProduct.name}
           </h3>
-          <p className="hidden min-h-[32px] text-[11px] leading-4 text-on-surface-variant opacity-75 min-[400px]:block sm:text-sm sm:leading-5">
+          <p className="hidden min-h-[32px] text-[11px] leading-5 text-on-surface-variant/90 min-[400px]:block sm:text-sm sm:leading-5">
             {shopProduct.description}
           </p>
         </div>
@@ -144,19 +142,19 @@ export default function ProductCard({
             {shopProduct.sizes.map((size) => (
               <button
                 key={size}
-                className="rounded-md border border-outline-variant/35 bg-surface px-2 py-1 text-[10px] font-label text-on-surface transition-colors hover:bg-surface-container-high sm:rounded-lg sm:px-2.5 sm:text-[11px]"
+                className="rounded-full border border-[#cda06f]/60 bg-white/55 px-2.5 py-1 text-[10px] font-semibold text-[#6f2507] transition-colors hover:bg-white/85 sm:px-3 sm:text-[11px]"
               >
                 {size}
               </button>
             ))}
           </div>
-          <div className="flex items-center justify-between">
-            <span className="font-headline text-base leading-none text-on-background min-[400px]:text-lg sm:text-[1.85rem]">
-              {shopProduct.price}
+          <div className="flex items-center justify-between border-t border-white/40 pt-3">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8f350f]">
+              Spice blend
             </span>
-            <button className="spice-gradient rounded-full p-2 text-on-primary shadow-lg shadow-primary/15 transition-transform hover:scale-105 sm:p-3">
-              <span className="material-symbols-outlined block text-base leading-none sm:text-xl">add_shopping_cart</span>
-            </button>
+            <span className="rounded-full bg-white/60 px-3 py-1 text-[11px] font-semibold text-[#6f2507] shadow-sm">
+              View details
+            </span>
           </div>
         </div>
       </div>
