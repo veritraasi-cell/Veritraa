@@ -4,40 +4,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
+import { veritraaShowcaseSlides } from '@/components/site/veritraaShowcaseSlides';
+
 type HeroSlide = {
   type: 'hero';
 };
 
-type ImageSlide = {
-  src: string;
-  alt: string;
-  mobilePosition: string;
-};
-
-const slides: Array<HeroSlide | ImageSlide> = [
+const slides: ReadonlyArray<HeroSlide | (typeof veritraaShowcaseSlides)[number]> = [
   {
     type: 'hero' as const,
   },
-  {
-    src: '/hero-mobile-1.jpeg',
-    alt: 'Veritraa spice story slide 1',
-    mobilePosition: 'object-center',
-  },
-  {
-    src: '/hero-mobile-2.jpeg',
-    alt: 'Veritraa spice story slide 2',
-    mobilePosition: 'object-center',
-  },
-  {
-    src: '/hero-mobile-3.jpeg',
-    alt: 'Veritraa spice story slide 3',
-    mobilePosition: 'object-center',
-  },
-  {
-    src: '/hero-mobile-4.jpeg',
-    alt: 'Veritraa spice story slide 4',
-    mobilePosition: 'object-center',
-  },
+  ...veritraaShowcaseSlides,
 ] as const;
 
 export default function MobileHeroCarousel() {

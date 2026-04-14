@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Leaf, Sparkles, Star } from 'lucide-react';
-import MobileHeroCarousel from '@/components/site/MobileHeroCarousel';
+import { ArrowRight, Leaf, Star } from 'lucide-react';
+import CloserLookCarousel from '@/components/site/CloserLookCarousel';
+import HeritageHero from '@/components/site/HeritageHero';
 import ProductCard from '@/components/site/ProductCard';
 import {
   homeBenefits,
@@ -26,47 +27,7 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="relative isolate hidden min-h-[calc(100vh-5.5rem)] overflow-hidden px-4 pt-4 sm:px-6 sm:pt-6 md:block md:px-8">
-        <div className="absolute inset-0">
-          <img
-            alt="Cinematic close-up of exotic spices"
-            className="h-full w-full object-cover object-center"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbYIa1YqPkAdvxpJljEpT6qO4A5dR4ceCvHAkLT3AuTzpMSk_PqAn4NaIf9Zm6zEMNFiukI_DyntN93ZmHBUQyWzjP8KyKrPOq4Hrk2GNgVxf3nTNFIHr3435khSXtkF88a0WN5DJ75YQtlKRiCDYjR3Tok5-2_roRwTq6MP0YjkOhUmDsiqz48Zl4Vhcchj_9AXDyc-ZVKni7uLdYHBNshLo-pScZtHE74OMyPjF46fMupEzx6oYWCbzLdEPGqb5ti6Yt5MGBHWXY"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(23,53,9,0.4)_0%,rgba(23,53,9,0)_40%,rgba(23,53,9,0)_60%,rgba(23,53,9,0.6)_100%)]" />
-        </div>
-
-        <Link href="/" className="absolute left-5 top-5 z-20 flex items-center gap-3 sm:left-6 sm:top-6">
-          <Image
-            alt="Veritraa logo"
-            src="/logo.jpeg"
-            width={128}
-            height={128}
-            priority
-            className="h-24 w-24 rounded-full object-cover shadow-[0_22px_44px_-20px_rgba(0,0,0,0.6)] sm:h-28 sm:w-28 md:h-32 md:w-32"
-          />
-        </Link>
-
-        <div className="relative z-10 flex min-h-[calc(100vh-6.5rem)] flex-col items-center justify-center text-center">
-          <h1 className="max-w-4xl font-headline text-4xl leading-[1.1] text-white drop-shadow-2xl sm:text-5xl md:text-7xl lg:text-8xl">
-            The World&apos;s Finest Spices &amp; Dry Fruits
-          </h1>
-        </div>
-
-        <div className="absolute bottom-8 left-12 hidden lg:block">
-          <p className="font-headline text-sm uppercase tracking-[0.3em] text-white/40 [writing-mode:vertical-lr]">
-            Veritraa Heritage
-          </p>
-        </div>
-
-        <div className="absolute bottom-8 right-12 hidden lg:block">
-          <p className="font-headline text-sm uppercase tracking-[0.3em] text-white/40 [writing-mode:vertical-lr]">
-            Est. MMXXIV
-          </p>
-        </div>
-      </section>
-
-      <MobileHeroCarousel />
+      <HeritageHero />
 
       <section className="story-surface mx-auto mt-5 max-w-screen-2xl rounded-3xl px-4 py-14 sm:px-6 sm:py-16 md:mt-6 md:px-8 md:py-24" id="collections">
         <div className="mb-10 sm:mb-12 md:mb-16">
@@ -102,95 +63,16 @@ export default function HomePage() {
 
       <section className="story-surface mx-2 rounded-3xl px-4 py-10 sm:mx-4 sm:px-6 sm:py-14 md:mx-6 md:px-8 md:py-20">
         <div className="mx-auto max-w-screen-2xl">
-          <div className="mb-8 flex flex-col gap-3 sm:mb-10 md:mb-12 md:flex-row md:items-end md:justify-between">
+          <div className="mb-8 sm:mb-10 md:mb-12">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#a04100]">Brand Gallery</p>
               <h2 className="mt-2 font-headline text-2xl text-on-background sm:text-3xl md:text-4xl">
                 A closer look at Veritraa
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-on-surface-variant sm:text-base">
-              A responsive collage showing the people, product, and brand story, designed to look balanced on both
-              phones and larger screens.
-            </p>
           </div>
 
-          <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:hidden">
-            <div className="min-w-full snap-center">
-              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
-                <Image
-                  src="/WhatsApp Image 2026-04-13 at 16.12.20.jpeg"
-                  alt="Veritraa brand showcase 1"
-                  fill
-                  sizes="100vw"
-                  className="object-contain object-center"
-                />
-                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
-              </div>
-            </div>
-
-            <div className="min-w-full snap-center">
-              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
-                <Image
-                  src="/WhatsApp Image 2026-04-13 at 16.12.28.jpeg"
-                  alt="Veritraa brand showcase 2"
-                  fill
-                  sizes="100vw"
-                  className="object-contain object-center"
-                />
-                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
-              </div>
-            </div>
-
-            <div className="min-w-full snap-center">
-              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
-                <Image
-                  src="/WhatsApp Image 2026-04-13 at 16.12.39.jpeg"
-                  alt="Veritraa brand showcase 3"
-                  fill
-                  sizes="100vw"
-                  className="object-contain object-center"
-                />
-                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden grid-cols-1 gap-4 md:grid md:grid-cols-3 md:gap-5">
-            <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3 md:col-span-2 md:aspect-[7/9]">
-              <Image
-                src="/WhatsApp Image 2026-04-13 at 16.12.20.jpeg"
-                alt="Veritraa brand showcase 1"
-                fill
-                sizes="(min-width: 768px) 66vw, 100vw"
-                className="object-contain object-center"
-              />
-              <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
-            </div>
-
-            <div className="grid gap-4 md:grid-rows-2">
-              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
-                <Image
-                  src="/WhatsApp Image 2026-04-13 at 16.12.28.jpeg"
-                  alt="Veritraa brand showcase 2"
-                  fill
-                  sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-contain object-center"
-                />
-                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
-              </div>
-              <div className="relative aspect-[7/9] overflow-hidden rounded-3xl bg-[#f8f1e7] p-3">
-                <Image
-                  src="/WhatsApp Image 2026-04-13 at 16.12.39.jpeg"
-                  alt="Veritraa brand showcase 3"
-                  fill
-                  sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-contain object-center"
-                />
-                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-black/5" />
-              </div>
-            </div>
-          </div>
+          <CloserLookCarousel />
         </div>
       </section>
 
