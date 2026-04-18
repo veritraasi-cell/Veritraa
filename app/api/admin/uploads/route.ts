@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { NextResponse } from 'next/server';
 import { getStorage } from 'firebase-admin/storage';
 import { getFirebaseAdminApp, hasFirebaseAdminConfig } from '@/lib/firebase/admin';
+import { shopifyGraphQL } from '@/lib/shopify/client';
 
 export const runtime = 'nodejs';
 
@@ -149,6 +150,86 @@ function buildFirebaseDownloadUrl(bucketName: string, objectPath: string, token:
   )}?alt=media&token=${token}`;
 }
 
+function formatShopifyUserErrors(userErrors?: Array<{ field?: string[] | null; message: string }>) {
+  return userErrors?.map((entry) => entry.message).filter(Boolean).join('; ') ?? '';
+}
+
+async function uploadImageToShopify(file: File, filename: string) {
+  const extension = path.extname(filename).toLowerCase();
+  const contentType =
+    file.type?.trim() || (extension === '.png' ? 'image/png' : extension === '.webp' ? 'image/webp' : 'image/jpeg');
+  const stagedUploadMutation = `
+    mutation StagedUploadsCreate($input: [StagedUploadInput!]!) {
+      stagedUploadsCreate(input: $input) {
+        stagedTargets {
+          url
+          resourceUrl
+          parameters {
+            name
+            value
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const stagedUploadData = await shopifyGraphQL<{
+    stagedUploadsCreate: {
+      stagedTargets: Array<{
+        url: string;
+        resourceUrl: string;
+        parameters: Array<{ name: string; value: string }>;
+      }>;
+      userErrors: Array<{ field?: string[] | null; message: string }>;
+    };
+  }>(stagedUploadMutation, {
+    input: [
+      {
+        filename,
+        mimeType: contentType,
+        httpMethod: 'POST',
+        resource: 'IMAGE',
+      },
+    ],
+  });
+
+  const stagedUploadError = formatShopifyUserErrors(stagedUploadData.stagedUploadsCreate.userErrors);
+  if (stagedUploadError) {
+    throw new Error(stagedUploadError);
+  }
+
+  const stagedTarget = stagedUploadData.stagedUploadsCreate.stagedTargets[0];
+  if (!stagedTarget) {
+    throw new Error('Shopify did not return a staged upload target for the image.');
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const formData = new FormData();
+  for (const parameter of stagedTarget.parameters) {
+    formData.append(parameter.name, parameter.value);
+  }
+
+  formData.append('file', new Blob([buffer], { type: contentType }), filename);
+
+  const uploadResponse = await fetch(stagedTarget.url, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!uploadResponse.ok) {
+    const body = await uploadResponse.text().catch(() => '');
+    throw new Error(
+      `Shopify image upload failed (${uploadResponse.status} ${uploadResponse.statusText}). ${normalizeUpstreamErrorMessage(body)}`.trim()
+    );
+  }
+
+  return stagedTarget.resourceUrl;
+}
+
 async function uploadImageToFirebase(file: File, objectPath: string) {
   if (!hasFirebaseAdminConfig()) {
     return null;
@@ -222,23 +303,12 @@ export async function POST(request: Request) {
     const objectDir = 'uploads/products';
 
     let firebaseUrl: string | null = null;
+    let firebaseError: unknown = null;
     try {
       firebaseUrl = await uploadImageToFirebase(file, `${objectDir}/${filename}`);
     } catch (error) {
+      firebaseError = error;
       console.error('Firebase Storage upload failed:', error);
-
-      // If Firebase Storage fails we can still fall back to filesystem uploads (when supported).
-      // For serverless/readonly filesystems this will be disabled and we return a clear message.
-      if (isProduction() && !canAttemptFilesystemUpload()) {
-        return fail(
-          [
-            buildFirebaseUploadErrorMessage(error),
-            'This deployment also appears to have a read-only filesystem, so local uploads are not available.',
-            'Use a writable server/VPS, or configure an external image host.',
-          ].join(' '),
-          200
-        );
-      }
     }
 
     if (firebaseUrl) {
@@ -251,14 +321,28 @@ export async function POST(request: Request) {
     }
 
     if (isProduction() && !canAttemptFilesystemUpload()) {
-      return fail(
-        [
-          'Image uploads are not configured on this deployment.',
-          'Firebase Storage is disabled/unavailable and the filesystem is read-only.',
-          'Use a writable server/VPS, or configure an external image host.',
-        ].join(' '),
-        200
-      );
+      try {
+        const shopifyUrl = await uploadImageToShopify(file, filename);
+        return NextResponse.json({
+          ok: true,
+          data: {
+            publicPath: shopifyUrl,
+          },
+        });
+      } catch (error) {
+        console.error('Shopify upload fallback failed:', error);
+        const firebaseMessage = firebaseError ? buildFirebaseUploadErrorMessage(firebaseError) : null;
+        const shopifyMessage = error instanceof Error ? normalizeUpstreamErrorMessage(error.message) : String(error);
+
+        return fail(
+          [
+            firebaseMessage ? firebaseMessage : 'Firebase Storage upload is unavailable.',
+            'This deployment also appears to have a read-only filesystem, so local uploads are not available.',
+            `Shopify upload fallback failed: ${shopifyMessage}`,
+          ].join(' '),
+          200
+        );
+      }
     }
 
     const absoluteDir = path.join(process.cwd(), 'public', ...objectDir.split('/'));
