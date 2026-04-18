@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentCustomerSession } from '@/lib/auth/customer-auth';
+import { getCurrentCustomerSessionLite } from '@/lib/auth/customer-auth';
 import {
   addCartLines,
   createCart,
@@ -17,7 +17,7 @@ function fail(message: string, status = 400) {
 }
 
 export async function GET(request: NextRequest) {
-  const session = await getCurrentCustomerSession(request.cookies);
+  const session = await getCurrentCustomerSessionLite(request.cookies);
 
   if (!session) {
     return fail('Please log in before accessing the cart.', 401);
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getCurrentCustomerSession(request.cookies);
+    const session = await getCurrentCustomerSessionLite(request.cookies);
 
     if (!session) {
       return fail('Please log in before shopping.', 401);

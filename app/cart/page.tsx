@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
 import CustomerAccessGate from '@/components/site/CustomerAccessGate';
 import CartPageClient from '@/components/site/CartPageClient';
-import { getCurrentCustomerSession } from '@/lib/auth/customer-auth';
+import { getCurrentCustomerSessionLite } from '@/lib/auth/customer-auth';
 
 export default async function CartPage() {
   const cookieStore = await cookies();
-  const session = await getCurrentCustomerSession(cookieStore);
+  const session = await getCurrentCustomerSessionLite(cookieStore);
 
   if (!session) {
     return (

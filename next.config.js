@@ -2,6 +2,9 @@
 const shopifyHostname = process.env.SHOPIFY_STORE_DOMAIN;
 
 const nextConfig = {
+  experimental: {
+    cpus: 2,
+  },
   images: {
     remotePatterns: [
       {

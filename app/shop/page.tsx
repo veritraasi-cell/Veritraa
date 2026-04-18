@@ -1,13 +1,13 @@
 import ShopCatalogClient from '@/components/site/ShopCatalogClient';
 import CustomerAccessGate from '@/components/site/CustomerAccessGate';
-import { getCurrentCustomerSession } from '@/lib/auth/customer-auth';
-import { listCatalogCategories, listCatalogProducts } from '@/src/lib/catalog';
+import { getCurrentCustomerSessionLite } from '@/lib/auth/customer-auth';
+import { listCatalogCategories, listLiveCatalogProducts } from '@/src/lib/catalog';
 import { getLiveShopProducts } from '@/src/lib/liveCatalog';
 import { cookies } from 'next/headers';
 
 export default async function ShopPage() {
   const cookieStore = await cookies();
-  const session = await getCurrentCustomerSession(cookieStore);
+  const session = await getCurrentCustomerSessionLite(cookieStore);
 
   if (!session) {
     return (
@@ -18,7 +18,7 @@ export default async function ShopPage() {
     );
   }
 
-  const catalogProducts = await listCatalogProducts();
+  const catalogProducts = await listLiveCatalogProducts();
   const [products, categories] = await Promise.all([
     getLiveShopProducts(catalogProducts),
     listCatalogCategories(catalogProducts),

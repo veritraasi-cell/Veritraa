@@ -60,6 +60,14 @@ export interface ShopifyProductDetail extends ShopifyProductSummary {
   variants: ShopifyProductVariant[];
 }
 
+export interface ShopifyCatalogProduct extends ShopifyProductSummary {
+  vendor: string;
+  productType: string;
+  tags: string[];
+  descriptionHtml: string;
+  variants: ShopifyProductVariant[];
+}
+
 export interface ShopifyOrderCustomerSummary {
   displayName: string | null;
   email: string | null;

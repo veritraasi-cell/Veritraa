@@ -25,16 +25,38 @@ function buildShopifyRestUrl(path: string) {
   return `https://${SHOPIFY_STORE_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}${normalizedPath}`;
 }
 
-export async function shopifyGraphQL<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
-  const response = await fetch(buildShopifyGraphqlUrl(), {
+type ShopifyFetchOptions = {
+  cache?: RequestCache;
+  revalidate?: number;
+  tags?: string[];
+};
+
+export async function shopifyGraphQL<T>(
+  query: string,
+  variables?: Record<string, unknown>,
+  options?: ShopifyFetchOptions
+): Promise<T> {
+  const cacheMode =
+    options?.cache ?? (typeof options?.revalidate === 'number' ? 'force-cache' : 'no-store');
+
+  const init: RequestInit & { next?: { revalidate?: number; tags?: string[] } } = {
     method: 'POST',
-    cache: 'no-store',
+    cache: cacheMode,
     headers: {
       'Content-Type': 'application/json',
       'X-Shopify-Access-Token': SHOPIFY_ADMIN_ACCESS_TOKEN as string,
     },
     body: JSON.stringify({ query, variables }),
-  });
+  };
+
+  if (typeof options?.revalidate === 'number' || (options?.tags && options.tags.length)) {
+    init.next = {
+      revalidate: options?.revalidate,
+      tags: options?.tags,
+    };
+  }
+
+  const response = await fetch(buildShopifyGraphqlUrl(), init);
 
   if (!response.ok) {
     const body = await response.text();

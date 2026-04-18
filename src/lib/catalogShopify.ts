@@ -1,8 +1,8 @@
 import 'server-only';
 
 import { cache } from 'react';
-import { listProducts, getProduct } from '@/lib/shopify/queries/products';
-import type { ShopifyProductDetail, ShopifyProductSummary } from '@/lib/shopify/types';
+import { listProductsWithDetails } from '@/lib/shopify/queries/products';
+import type { ShopifyCatalogProduct, ShopifyProductVariant } from '@/lib/shopify/types';
 import { shopCategories, type ShopProduct } from '@/src/data/mockData';
 
 export type ManagedCatalogProduct = ShopProduct & {
@@ -71,101 +71,77 @@ function stripHtml(value: string) {
     .trim();
 }
 
-function getWeightLabel(variant: ShopifyProductDetail['variants'][number]) {
+function getWeightLabel(variant: ShopifyProductVariant) {
   return variant.selectedOptions.find((option) => option.name.toLowerCase() === 'weight')?.value ?? variant.title;
 }
 
-function buildManagedCatalogProductFromShopify(
-  summary: ShopifyProductSummary,
-  product: ShopifyProductDetail
-): ManagedCatalogProduct {
+function buildManagedCatalogProductFromShopify(product: ShopifyCatalogProduct): ManagedCatalogProduct {
   const variants = product.variants ?? [];
   const normalizedVariants = variants.map((variant) => ({
     label: getWeightLabel(variant),
     price: variant.price,
-    quantity: variant.inventoryQuantity ?? summary.totalInventory ?? 0,
+    quantity: variant.inventoryQuantity ?? product.totalInventory ?? 0,
   }));
   const primaryVariant = normalizedVariants[0];
-  const featuredImage = product.featuredImage ?? summary.featuredImage;
+  const featuredImage = product.featuredImage;
   const descriptionHtml = product.descriptionHtml ?? '';
-  const description = stripHtml(descriptionHtml) || summary.title;
+  const description = stripHtml(descriptionHtml) || product.title;
 
   return {
-    id: summary.id,
+    id: product.id,
     source: 'shopify',
-    slug: summary.handle,
-    shopifyHandle: summary.handle,
-    name: summary.title,
+    slug: product.handle,
+    shopifyHandle: product.handle,
+    name: product.title,
     description,
     image: featuredImage?.url ?? '/uploads/products/placeholder.png',
     sizes: normalizedVariants.map((variant) => variant.label),
-    highlights: dedupeList(product.tags.filter((tag) => tag !== summary.handle && tag !== summary.title)),
+    highlights: dedupeList(product.tags.filter((tag) => tag !== product.handle && tag !== product.title)),
     vendor: product.vendor,
     productType: product.productType,
     categoryName: product.productType || 'Herbs & Spices',
     tags: product.tags,
     price: primaryVariant?.price ?? '0.00',
-    quantity: primaryVariant?.quantity ?? summary.totalInventory ?? 0,
+    quantity: primaryVariant?.quantity ?? product.totalInventory ?? 0,
     variantDefinitions: normalizedVariants,
-    imageAlt: featuredImage?.altText ?? summary.title,
+    imageAlt: featuredImage?.altText ?? product.title,
     descriptionHtml,
-    status: summary.status as ManagedCatalogProduct['status'],
-    isPushed: summary.status === 'ACTIVE',
-    updatedAt: summary.updatedAt,
+    status: product.status as ManagedCatalogProduct['status'],
+    isPushed: product.status === 'ACTIVE',
+    updatedAt: product.updatedAt,
   };
 }
 
-async function listAllShopifyProductSummaries() {
+async function listAllShopifyProductsWithDetails(options?: { query?: string | null }) {
   try {
-    const summaries: ShopifyProductSummary[] = [];
+    const products: ShopifyCatalogProduct[] = [];
     let after: string | null = null;
 
     do {
-      const page = await listProducts({ first: 100, after });
-      summaries.push(...page.nodes);
+      const page = await listProductsWithDetails({ first: 100, after, query: options?.query ?? null });
+      products.push(...page.nodes);
       after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
     } while (after);
 
-    return summaries;
+    return products;
   } catch (error) {
     console.error('Error fetching Shopify products:', error instanceof Error ? error.message : String(error));
     return [];
   }
 }
 
-async function buildCatalogProductsWithBatching(
-  summaries: ShopifyProductSummary[]
-): Promise<ManagedCatalogProduct[]> {
-  if (summaries.length === 0) {
+const getCachedLiveCatalogProducts = cache(async (): Promise<ManagedCatalogProduct[]> => {
+  try {
+    const products = await listAllShopifyProductsWithDetails({ query: 'status:active' });
+    return products.map((product) => buildManagedCatalogProductFromShopify(product));
+  } catch (error) {
+    console.error('Error building live catalog products:', error instanceof Error ? error.message : String(error));
     return [];
   }
+});
 
-  // Process products in batches of 5 to avoid overwhelming the API
-  const batchSize = 5;
-  const allProducts: ManagedCatalogProduct[] = [];
-
-  for (let i = 0; i < summaries.length; i += batchSize) {
-    const batch = summaries.slice(i, i + batchSize);
-    
-    try {
-      const batchResults = await Promise.allSettled(
-        batch.map(async (summary) => {
-          const detail = await getProduct(summary.id);
-          return buildManagedCatalogProductFromShopify(summary, detail);
-        })
-      );
-
-      allProducts.push(
-        ...batchResults
-          .filter((result) => result.status === 'fulfilled')
-          .map((result) => (result as PromiseFulfilledResult<ManagedCatalogProduct>).value)
-      );
-    } catch (batchError) {
-      console.error(`Error processing batch ${i / batchSize + 1}:`, batchError);
-    }
-  }
-
-  return allProducts;
+export async function listLiveCatalogProducts(): Promise<ManagedCatalogProduct[]> {
+  return getCachedLiveCatalogProducts();
 }
 
 // Use React's cache to memoize results within a request
@@ -176,8 +152,8 @@ const getCachedCatalogProducts = cache(
     }
 
     try {
-      const summaries = await listAllShopifyProductSummaries();
-      return await buildCatalogProductsWithBatching(summaries);
+      const products = await listAllShopifyProductsWithDetails();
+      return products.map((product) => buildManagedCatalogProductFromShopify(product));
     } catch (error) {
       console.error('Error building catalog products:', error instanceof Error ? error.message : String(error));
       return [];

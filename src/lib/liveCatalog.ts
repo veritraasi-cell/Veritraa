@@ -3,13 +3,13 @@ import 'server-only';
 import { cache } from 'react';
 import type { ShopProduct } from '@/src/data/mockData';
 import type { ManagedCatalogProduct } from '@/src/lib/catalog';
-import { listCatalogProducts } from '@/src/lib/catalog';
+import { listLiveCatalogProducts } from '@/src/lib/catalog';
 
 // Use React's cache to memoize results within a request
 const getCachedLiveProducts = cache(
   async (cachedProducts?: ManagedCatalogProduct[]): Promise<ShopProduct[]> => {
     try {
-      const catalogProducts = cachedProducts ?? (await listCatalogProducts());
+      const catalogProducts = cachedProducts ?? (await listLiveCatalogProducts());
       
       // Return only ACTIVE published products
       return catalogProducts.filter(

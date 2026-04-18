@@ -3,6 +3,7 @@ import 'server-only';
 import { shopifyGraphQL } from '@/lib/shopify/client';
 import type {
   ShopifyPageInfo,
+  ShopifyCatalogProduct,
   ShopifyProductDetail,
   ShopifyProductSummary,
   ShopifyProductVariant,
@@ -24,6 +25,19 @@ interface ProductDetailQueryResponse {
       nodes: ShopifyProductVariant[];
     };
   }) | null;
+}
+
+type ShopifyCatalogProductNode = Omit<ShopifyCatalogProduct, 'variants'> & {
+  variants: {
+    nodes: ShopifyProductVariant[];
+  };
+};
+
+interface ProductListDetailedQueryResponse {
+  products: {
+    nodes: ShopifyCatalogProductNode[];
+    pageInfo: ShopifyPageInfo;
+  };
 }
 
 function buildProductSearchQuery(searchText: string) {
@@ -79,6 +93,74 @@ export async function listProducts(options: { first?: number; after?: string | n
   });
 
   return data.products;
+}
+
+export async function listProductsWithDetails(
+  options: { first?: number; after?: string | null; query?: string | null } = {}
+) {
+  const query = `
+    query ProductListDetailed($first: Int!, $after: String, $query: String) {
+      products(first: $first, after: $after, query: $query, reverse: true, sortKey: UPDATED_AT) {
+        nodes {
+          id
+          title
+          handle
+          status
+          totalInventory
+          updatedAt
+          featuredImage {
+            url
+            altText
+          }
+          vendor
+          productType
+          tags
+          descriptionHtml
+          variants(first: 100) {
+            nodes {
+              id
+              title
+              price
+              compareAtPrice
+              inventoryQuantity
+              inventoryItem {
+                id
+              }
+              selectedOptions {
+                name
+                value
+              }
+            }
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyGraphQL<ProductListDetailedQueryResponse>(
+    query,
+    {
+      first: options.first ?? 25,
+      after: options.after ?? null,
+      query: options.query ?? null,
+    },
+    {
+      revalidate: 60,
+      tags: ['shopify:products'],
+    }
+  );
+
+  return {
+    ...data.products,
+    nodes: data.products.nodes.map((node) => ({
+      ...node,
+      variants: node.variants.nodes,
+    })),
+  } satisfies { nodes: ShopifyCatalogProduct[]; pageInfo: ShopifyPageInfo };
 }
 
 export async function getProduct(productId: string) {

@@ -11,6 +11,10 @@ import {
 export const CUSTOMER_SESSION_COOKIE_NAME = 'veritraa_customer_session';
 const CUSTOMER_SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 
+function decodedTokenExpiry(decoded: DecodedIdToken) {
+  return new Date((decoded.exp ?? Math.floor(Date.now() / 1000)) * 1000);
+}
+
 function buildCustomerSessionCookie(value: string) {
   return {
     name: CUSTOMER_SESSION_COOKIE_NAME,
@@ -105,7 +109,36 @@ export async function getCurrentCustomerSession(cookieStore: {
     return {
       customer,
       session: {
-        expiresAt: new Date((decoded.exp ?? Math.floor(Date.now() / 1000)) * 1000),
+        expiresAt: decodedTokenExpiry(decoded),
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function getCurrentCustomerSessionLite(
+  cookieStore: {
+    get(name: string): { value: string } | undefined;
+  },
+  options?: {
+    checkRevoked?: boolean;
+  }
+) {
+  const token = cookieStore.get(CUSTOMER_SESSION_COOKIE_NAME)?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const auth = getFirebaseAdminAuth();
+    const decoded = await auth.verifySessionCookie(token, options?.checkRevoked ?? false);
+
+    return {
+      uid: decoded.uid,
+      session: {
+        expiresAt: decodedTokenExpiry(decoded),
       },
     };
   } catch {
