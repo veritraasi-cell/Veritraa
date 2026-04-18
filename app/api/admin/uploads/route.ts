@@ -7,6 +7,8 @@ import { getFirebaseAdminApp, hasFirebaseAdminConfig } from '@/lib/firebase/admi
 
 export const runtime = 'nodejs';
 
+const MAX_UPLOAD_BYTES = 6 * 1024 * 1024; // 6MB
+
 function fail(message: string, status = 400) {
   return NextResponse.json({ ok: false, error: message }, { status });
 }
@@ -15,10 +17,36 @@ function isProduction() {
   return process.env.NODE_ENV === 'production';
 }
 
+function isLikelyServerlessFilesystem() {
+  return Boolean(
+    process.env.VERCEL ||
+      process.env.NETLIFY ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      process.env.FUNCTION_NAME
+  );
+}
+
+function canAttemptFilesystemUpload() {
+  if (!isProduction()) {
+    return true;
+  }
+
+  const allowOverride = process.env.UPLOADS_ALLOW_FILESYSTEM?.trim().toLowerCase();
+  if (allowOverride === 'true' || allowOverride === '1' || allowOverride === 'yes') {
+    return true;
+  }
+
+  return !isLikelyServerlessFilesystem();
+}
+
 function normalizeBucketName(value: string | undefined) {
   const trimmed = value?.trim();
   if (!trimmed) {
     return '';
+  }
+
+  if (/^gs:\/\//i.test(trimmed)) {
+    return trimmed.replace(/^gs:\/\//i, '').split('/')[0] ?? '';
   }
 
   if (/^https?:\/\//i.test(trimmed)) {
@@ -30,6 +58,66 @@ function normalizeBucketName(value: string | undefined) {
   }
 
   return trimmed;
+}
+
+function normalizeUpstreamErrorMessage(message: string) {
+  const normalized = message.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= 240) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, 240)}…`;
+}
+
+function buildFirebaseUploadErrorMessage(error: unknown) {
+  const candidates = getFirebaseStorageBucketCandidates();
+  const candidateText = candidates.length ? ` Tried buckets: ${candidates.join(', ')}.` : '';
+  const message = error instanceof Error ? error.message : String(error);
+  const safeMessage = message ? normalizeUpstreamErrorMessage(message) : '';
+  const codeRaw =
+    error && typeof error === 'object' && 'code' in error
+      ? (error as { code?: unknown }).code
+      : undefined;
+  const code = typeof codeRaw === 'number' ? codeRaw : Number.isFinite(Number(codeRaw)) ? Number(codeRaw) : null;
+
+  if (!hasFirebaseAdminConfig()) {
+    return (
+      'Image uploads are not configured in this environment. ' +
+      'Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY (and optionally FIREBASE_STORAGE_BUCKET).'
+    );
+  }
+
+  if (!candidates.length) {
+    return (
+      'Firebase Storage bucket is not configured. ' +
+      'Set FIREBASE_STORAGE_BUCKET (or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) to your Firebase Storage bucket name.'
+    );
+  }
+
+  const base = `Image upload failed.${candidateText}`;
+
+  if (code === 404 || /not\s*found|no\s*such\s*bucket|unknown\s*bucket/i.test(safeMessage)) {
+    return (
+      `${base} Firebase Storage bucket was not found. ` +
+      'Open Firebase Console → Storage to provision the bucket, then set FIREBASE_STORAGE_BUCKET to the bucket name (often <projectId>.appspot.com).'
+    );
+  }
+
+  if (code === 403 || /permission|forbidden|insufficient\s*permissions/i.test(safeMessage)) {
+    return (
+      `${base} Firebase credentials do not have permission to write to this bucket. ` +
+      'Grant the service account a Storage role (for example, Storage Object Admin) for the bucket in Google Cloud IAM.'
+    );
+  }
+
+  if (code === 401 || /unauthorized|invalid\s*credential|invalid\s*jwt|invalid\s*grant/i.test(safeMessage)) {
+    return (
+      `${base} Firebase Admin credentials look invalid. ` +
+      'Re-check FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY formatting (the private key must preserve newlines).'
+    );
+  }
+
+  return safeMessage ? `${base} Upstream: ${safeMessage}` : base;
 }
 
 function getFirebaseStorageBucketCandidates() {
@@ -116,6 +204,10 @@ export async function POST(request: Request) {
       return fail('Image file is required.');
     }
 
+    if (typeof file.size === 'number' && file.size > MAX_UPLOAD_BYTES) {
+      return fail('Image file must be 6MB or smaller.');
+    }
+
     if (file.type && !file.type.startsWith('image/')) {
       return fail('Only image uploads are supported.');
     }
@@ -135,9 +227,17 @@ export async function POST(request: Request) {
     } catch (error) {
       console.error('Firebase Storage upload failed:', error);
 
-      // In production, do not attempt filesystem writes (serverless/readonly deployments).
-      if (isProduction()) {
-        return fail('Image upload failed. Check Firebase Storage configuration.', 200);
+      // If Firebase Storage fails we can still fall back to filesystem uploads (when supported).
+      // For serverless/readonly filesystems this will be disabled and we return a clear message.
+      if (isProduction() && !canAttemptFilesystemUpload()) {
+        return fail(
+          [
+            buildFirebaseUploadErrorMessage(error),
+            'This deployment also appears to have a read-only filesystem, so local uploads are not available.',
+            'Use a writable server/VPS, or configure an external image host.',
+          ].join(' '),
+          200
+        );
       }
     }
 
@@ -150,9 +250,13 @@ export async function POST(request: Request) {
       });
     }
 
-    if (isProduction()) {
+    if (isProduction() && !canAttemptFilesystemUpload()) {
       return fail(
-        'Image uploads are not configured in this environment. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY (and optionally FIREBASE_STORAGE_BUCKET).',
+        [
+          'Image uploads are not configured on this deployment.',
+          'Firebase Storage is disabled/unavailable and the filesystem is read-only.',
+          'Use a writable server/VPS, or configure an external image host.',
+        ].join(' '),
         200
       );
     }
@@ -163,12 +267,12 @@ export async function POST(request: Request) {
     await mkdir(absoluteDir, { recursive: true });
     await writeFile(absolutePath, Buffer.from(await file.arrayBuffer()));
     const relativePath = `/${objectDir}/${filename}`;
-    const publicUrl = new URL(relativePath, request.url).toString();
 
     return NextResponse.json({
       ok: true,
       data: {
-        publicPath: publicUrl,
+        // Keep this as a relative path so next/image treats it as a local asset.
+        publicPath: relativePath,
       },
     });
   } catch (error) {
