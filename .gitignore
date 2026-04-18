@@ -6,6 +6,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+build.out
+dev_output.log
+
+# Next.js output
+.next/
+.turbo/
+.vercel/
+out/
+*.tsbuildinfo
 
 node_modules
 dist

@@ -34,7 +34,20 @@ export type ShopProduct = {
   description: string;
   image: string;
   sizes: string[];
+  variantDefinitions?: Array<{
+    label: string;
+    price: string;
+    quantity: number;
+  }>;
   highlights: string[];
+  vendor?: string;
+  productType?: string;
+  categoryName?: string;
+  tags?: string[];
+  price?: string;
+  quantity?: number;
+  imageAlt?: string;
+  descriptionHtml?: string;
   tag?: {
     icon: string;
     label: string;
@@ -74,6 +87,8 @@ export type StoreLocation = {
   timings: string;
   contact: string;
 };
+
+import { applyCatalogPricing } from './catalogPricing';
 
 export const brochureDownloadHref = '/brochures/Veritraa-Brochure-1-Final.pdf';
 
@@ -173,7 +188,7 @@ export const shopCategories: ReadonlyArray<string> = [
   'Kitchen Essentials',
 ];
 
-export const shopProducts: ReadonlyArray<ShopProduct> = [
+const rawShopProducts: ReadonlyArray<ShopProduct> = [
   {
     slug: 'dry-red-chilli-powder-kashmiri-lal',
     name: 'Dry Red Chilli Powder (Kashmiri Lal)',
@@ -321,6 +336,8 @@ export const shopProducts: ReadonlyArray<ShopProduct> = [
   },
 ];
 
+export const shopProducts: ReadonlyArray<ShopProduct> = rawShopProducts.map((product) => applyCatalogPricing(product));
+
 export function getShopProductBySlug(slug: string) {
   return shopProducts.find((product) => product.slug === slug);
 }
@@ -328,14 +345,14 @@ export function getShopProductBySlug(slug: string) {
 export const testimonials: ReadonlyArray<Testimonial> = [
   {
     quote:
-      "The aroma when I opened the Garam Masala jar was like walking into my grandmother's kitchen. Exceptional quality.",
+      "The aroma when I opened the Garam Masala jar took me straight back to my grandmother's kitchen. The quality is exceptional.",
     name: 'Amrita Sharma',
     role: 'Food Blogger',
     initial: 'A',
   },
   {
     quote:
-      "Finally found a brand that doesn't compromise on purity. Their Lakadong Turmeric is genuinely life-changing for my morning wellness ritual.",
+      "At last, a brand that does not compromise on purity. Their Lakadong Turmeric has become part of my daily wellness routine.",
     name: 'Rohan Mehta',
     role: 'Chef at Spicery',
     initial: 'R',
@@ -343,7 +360,7 @@ export const testimonials: ReadonlyArray<Testimonial> = [
   },
   {
     quote:
-      "Beautiful packaging and even better contents. This was the perfect gift for my parents. They're loyal customers now!",
+      "Beautiful packaging and even better contents. It made the perfect gift for my parents, and now they are loyal customers.",
     name: 'Sarah Jenkins',
     role: 'Home Enthusiast',
     initial: 'S',

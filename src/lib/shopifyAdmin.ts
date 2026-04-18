@@ -7,6 +7,16 @@ const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? '2026-04';
 export interface AdminProduct {
   id: string;
   title: string;
+  handle: string;
+  status: string;
+  totalInventory: number;
+  updatedAt: string;
+}
+
+export interface ShopifyProductSummary {
+  id: string;
+  title: string;
+  handle: string;
   status: string;
   totalInventory: number;
   updatedAt: string;
@@ -164,8 +174,21 @@ interface DashboardQueryResponse {
   };
 }
 
+interface ProductSearchQueryResponse {
+  products: {
+    nodes: ShopifyProductSummary[];
+  };
+}
+
 interface ProductDetailQueryResponse {
-  product: ProductDetail | null;
+  product: (Omit<ProductDetail, 'media' | 'variants'> & {
+    media: {
+      nodes: ProductDetail['media'];
+    };
+    variants: {
+      nodes: ProductVariantDetail[];
+    };
+  }) | null;
 }
 
 interface OrderDetailQueryResponse {
@@ -218,6 +241,17 @@ async function shopifyGraphql<T>(
 
   if (!response.ok) {
     const body = await response.text();
+
+    if (response.status === 401) {
+      throw new Error(
+        [
+          `Shopify Admin authentication failed for ${SHOPIFY_STORE_DOMAIN} (${response.status} ${response.statusText}).`,
+          'The request format is correct, so this usually means the Admin API token is revoked, belongs to a different store, or the app was reconfigured and needs a fresh token.',
+          'Check that SHOPIFY_STORE_DOMAIN is the exact *.myshopify.com domain for the store that created this token, then regenerate/reveal the Admin API access token in Shopify and restart the dev server.',
+        ].join(' ')
+      );
+    }
+
     throw new Error(
       `Shopify API request failed (${response.status} ${response.statusText}): ${body}`
     );
@@ -238,6 +272,28 @@ async function shopifyGraphql<T>(
 
 function formatUserErrors(userErrors?: Array<{ field?: string[] | null; message: string }>) {
   return userErrors?.map((entry) => entry.message).join('; ') ?? '';
+}
+
+function buildProductSearchQuery(searchText: string) {
+  const trimmedSearchText = searchText.trim();
+  if (!trimmedSearchText) {
+    throw new Error('Product search query is required.');
+  }
+
+  if (/^gid:\/\/shopify\/Product\/\d+$/i.test(trimmedSearchText)) {
+    return `id:${trimmedSearchText}`;
+  }
+
+  const terms = trimmedSearchText
+    .split(/\s+/)
+    .map((entry) => entry.trim().replace(/"/g, '\\"'))
+    .filter(Boolean);
+
+  if (!terms.length) {
+    throw new Error('Product search query is required.');
+  }
+
+  return terms.map((term) => `(title:*${term}* OR handle:*${term}*)`).join(' AND ');
 }
 
 export async function getShopifyAdminDashboardData(): Promise<ShopifyAdminDashboardData> {
@@ -261,6 +317,7 @@ export async function getShopifyAdminDashboardData(): Promise<ShopifyAdminDashbo
         nodes {
           id
           title
+          handle
           status
           totalInventory
           updatedAt
@@ -358,7 +415,11 @@ export async function getShopifyProductDetail(productId: string): Promise<Produc
     throw new Error('Product not found.');
   }
 
-  return data.product;
+  return {
+    ...data.product,
+    media: data.product.media.nodes,
+    variants: data.product.variants.nodes,
+  };
 }
 
 export async function getShopifyOrderDetail(orderId: string): Promise<OrderDetail> {
@@ -460,6 +521,30 @@ export async function getShopifyLocations(): Promise<ShopifyLocation[]> {
 
   const data = await shopifyGraphql<LocationsQueryResponse>(query);
   return data.locations.nodes;
+}
+
+export async function searchShopifyProducts(searchText: string): Promise<ShopifyProductSummary[]> {
+  const queryText = buildProductSearchQuery(searchText);
+  const query = `
+    query ProductSearch($query: String!) {
+      products(first: 12, query: $query, reverse: true, sortKey: UPDATED_AT) {
+        nodes {
+          id
+          title
+          handle
+          status
+          totalInventory
+          updatedAt
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyGraphql<ProductSearchQueryResponse>(query, {
+    query: queryText,
+  });
+
+  return data.products.nodes;
 }
 
 export async function bulkUpdateProductVariants(
@@ -797,5 +882,159 @@ export function validateShopifyAdminConfig() {
     hasStoreDomain: Boolean(SHOPIFY_STORE_DOMAIN),
     hasAdminToken: Boolean(SHOPIFY_ADMIN_ACCESS_TOKEN),
     apiVersion: SHOPIFY_API_VERSION,
+  };
+}
+
+interface WebhookSubscriptionNode {
+  id: string;
+  topic: string;
+  uri: string;
+}
+
+interface WebhookSubscriptionsQueryResponse {
+  webhookSubscriptions: {
+    nodes: WebhookSubscriptionNode[];
+  };
+}
+
+interface WebhookSubscriptionCreateResponse {
+  webhookSubscriptionCreate: {
+    webhookSubscription: WebhookSubscriptionNode | null;
+    userErrors: Array<{ field?: string[] | null; message: string }>;
+  };
+}
+
+const SHOPIFY_WEBHOOK_TOPICS = ['ORDERS_CREATE', 'ORDERS_UPDATED'] as const;
+
+export function resolveShopifyWebhookBaseUrl(headerStore?: { get(name: string): string | null }) {
+  const configuredBaseUrl =
+    process.env.SHOPIFY_WEBHOOK_BASE_URL?.trim() || process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+  if (configuredBaseUrl) {
+    try {
+      const parsed = new URL(configuredBaseUrl);
+      return parsed.protocol === 'https:' ? parsed.origin : null;
+    } catch {
+      return null;
+    }
+  }
+
+  if (!headerStore) {
+    return null;
+  }
+
+  const forwardedHost =
+    headerStore.get('x-forwarded-host')?.split(',')[0]?.trim() ?? headerStore.get('host')?.split(',')[0]?.trim() ?? null;
+  const forwardedProto = headerStore.get('x-forwarded-proto')?.split(',')[0]?.trim() ?? null;
+
+  if (!forwardedHost) {
+    return null;
+  }
+
+  if (forwardedHost.startsWith('localhost') || forwardedHost.startsWith('127.0.0.1')) {
+    return null;
+  }
+
+  if (forwardedProto !== 'https') {
+    return null;
+  }
+
+  return `https://${forwardedHost}`;
+}
+
+async function listWebhookSubscriptions(topic: string, uri: string) {
+  const query = `
+    query WebhookSubscriptionsByTopicAndUri($topic: [WebhookSubscriptionTopic!]!, $uri: String!) {
+      webhookSubscriptions(first: 25, topics: $topic, uri: $uri) {
+        nodes {
+          id
+          topic
+          uri
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyGraphql<WebhookSubscriptionsQueryResponse>(query, {
+    topic: [topic],
+    uri,
+  });
+
+  return data.webhookSubscriptions.nodes;
+}
+
+async function createWebhookSubscription(topic: string, uri: string) {
+  const mutation = `
+    mutation CreateWebhookSubscription($topic: WebhookSubscriptionTopic!, $webhookSubscription: WebhookSubscriptionInput!) {
+      webhookSubscriptionCreate(topic: $topic, webhookSubscription: $webhookSubscription) {
+        webhookSubscription {
+          id
+          topic
+          uri
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyGraphql<WebhookSubscriptionCreateResponse>(mutation, {
+    topic,
+    webhookSubscription: {
+      uri,
+      format: 'JSON',
+      name: 'Veritraa order sync',
+    },
+  });
+
+  const errorMessage = formatUserErrors(data.webhookSubscriptionCreate.userErrors);
+  if (errorMessage) {
+    throw new Error(errorMessage);
+  }
+
+  if (!data.webhookSubscriptionCreate.webhookSubscription) {
+    throw new Error('Shopify did not return a webhook subscription.');
+  }
+
+  return data.webhookSubscriptionCreate.webhookSubscription;
+}
+
+export async function ensureShopifyOrderWebhookSubscriptions(baseUrl: string) {
+  const normalizedBaseUrl = (() => {
+    try {
+      const parsed = new URL(baseUrl);
+      return parsed.protocol === 'https:' ? parsed.origin : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  if (!normalizedBaseUrl) {
+    return {
+      endpoint: null,
+      registeredTopics: [] as Array<{ topic: string; status: 'created' | 'existing' }>,
+    };
+  }
+
+  const endpoint = new URL('/api/webhooks/shopify/orders', normalizedBaseUrl).toString();
+  const registeredTopics: Array<{ topic: string; status: 'created' | 'existing' }> = [];
+
+  for (const topic of SHOPIFY_WEBHOOK_TOPICS) {
+    const existingSubscriptions = await listWebhookSubscriptions(topic, endpoint);
+
+    if (existingSubscriptions.some((subscription) => subscription.topic === topic && subscription.uri === endpoint)) {
+      registeredTopics.push({ topic, status: 'existing' });
+      continue;
+    }
+
+    await createWebhookSubscription(topic, endpoint);
+    registeredTopics.push({ topic, status: 'created' });
+  }
+
+  return {
+    endpoint,
+    registeredTopics,
   };
 }

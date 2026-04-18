@@ -22,8 +22,8 @@ const heroHighlights = [
 
 export default function HeritageHero() {
   return (
-    <section className="relative mx-2 mt-4 overflow-hidden rounded-[2rem] sm:mx-4 md:mx-6">
-      <div className="relative isolate min-h-[76vh] overflow-hidden rounded-[2rem] shadow-[0_28px_90px_-42px_rgba(5,46,22,0.95)]">
+    <section className="relative w-full overflow-hidden">
+      <div className="relative isolate min-h-[calc(100svh-72px)] overflow-hidden bg-[#1c140f] sm:min-h-[calc(100svh-78px)] md:min-h-[calc(100svh-92px)]">
         <Image
           src="/hero-heritage-spices.png"
           alt=""
@@ -37,9 +37,8 @@ export default function HeritageHero() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(18,22,16,0.5)_0%,rgba(18,22,16,0.2)_28%,rgba(18,22,16,0.12)_54%,rgba(18,22,16,0.34)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 h-56 bg-[radial-gradient(circle_at_50%_110%,rgba(245,158,11,0.32),transparent_46%)]" />
         <div className="absolute inset-x-0 top-0 h-40 bg-[linear-gradient(180deg,rgba(32,24,14,0.12),transparent)]" />
-        <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-white/10" />
 
-        <div className="relative z-10 mx-auto flex min-h-[76vh] max-w-6xl flex-col items-center justify-center px-4 py-14 text-center sm:px-6 sm:py-16 md:min-h-[calc(100vh-8.5rem)] md:px-8 md:py-20">
+        <div className="relative z-10 mx-auto flex min-h-[calc(100svh-72px)] max-w-6xl flex-col items-center justify-center px-4 py-14 text-center sm:min-h-[calc(100svh-78px)] sm:px-6 sm:py-16 md:min-h-[calc(100svh-92px)] md:px-8 md:py-20">
           <p className="mb-5 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.38em] text-[#f8cf65] sm:text-xs">
             <span className="h-px w-8 bg-[#f59e0b]/60 sm:w-12" />
             Sensory Heritage

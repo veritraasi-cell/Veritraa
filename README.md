@@ -167,18 +167,27 @@ Each product includes:
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 20.9+
 - npm or yarn
 
 ### Installation
 
 1. **Navigate to project**:
    ```bash
-   cd "c:\Users\acer\Documents\GitHub\Veritraa"
+   cd "c:\Users\Administrator\Documents\GitHub\masalaa"
    ```
 
 2. **Install dependencies**:
    ```bash
+   npm install
+   ```
+
+   If you already installed dependencies with an older project setup and want
+   a clean upgrade to the current stack, reinstall once:
+
+   ```powershell
+   Remove-Item -Recurse -Force node_modules
+   Remove-Item -Force package-lock.json
    npm install
    ```
 
@@ -191,6 +200,14 @@ Each product includes:
    ```
    http://localhost:3000
    ```
+
+### Troubleshooting
+
+If you see `Failed to load SWC binary for win32/x64` or
+`next-swc.win32-x64-msvc.node is not a valid Win32 application` on Windows,
+the project is usually running on an older Next.js dependency set.
+This repo now targets Next.js 16 and React 19 with a Node.js requirement of
+20.9+. Reinstall dependencies and run `npm run dev` again.
 
 ### Building for Production
 

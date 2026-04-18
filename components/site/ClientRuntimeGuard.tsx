@@ -4,9 +4,7 @@ import { useEffect } from 'react';
 
 const RELOAD_KEY = 'veritraa-runtime-reset';
 
-interface ClientRuntimeGuardProps {}
-
-export default function ClientRuntimeGuard(_: Readonly<ClientRuntimeGuardProps>) {
+export default function ClientRuntimeGuard() {
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;

@@ -21,25 +21,14 @@ export default function CloserLookCarousel() {
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.95fr)] lg:items-start">
       <div className="overflow-hidden rounded-[1.75rem] border border-[#dcc4b0]/70 bg-[#f8f1e7] p-3 shadow-[0_26px_60px_-40px_rgba(80,28,10,0.8)] sm:p-4">
         <div className="relative aspect-square overflow-hidden rounded-[1.35rem] border border-white/45 bg-[radial-gradient(circle_at_top,rgba(255,248,240,0.95),rgba(233,213,191,0.92))]">
-          {veritraaShowcaseSlides.map((slide, index) => (
-            <div
-              key={slide.src}
-              className={`absolute inset-0 transition-opacity duration-700 ease-out ${
-                index === activeSlide ? 'opacity-100' : 'pointer-events-none opacity-0'
-              }`}
-            >
-              <Image
-                src={slide.src}
-                alt={slide.alt}
-                fill
-                priority={index === 0}
-                sizes="(min-width: 1024px) 55vw, 100vw"
-                className={`object-contain p-2 transition-transform duration-[1400ms] sm:p-4 ${
-                  index === activeSlide ? 'scale-100' : 'scale-[1.03]'
-                }`}
-              />
-            </div>
-          ))}
+          <Image
+            key={currentSlide.src}
+            src={currentSlide.src}
+            alt={currentSlide.alt}
+            fill
+            sizes="(min-width: 1024px) 55vw, 100vw"
+            className="object-contain p-2 transition-transform duration-[1400ms] sm:p-4 scale-100"
+          />
         </div>
 
         <div className="mt-4 rounded-[1.25rem] border border-[#e2cdb9] bg-white/72 p-5 shadow-[0_18px_30px_-28px_rgba(70,28,12,0.8)] sm:p-6">

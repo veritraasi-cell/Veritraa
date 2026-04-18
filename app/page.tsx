@@ -1,18 +1,17 @@
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Leaf, Star } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Leaf, MessageSquareQuote, Star, Wind } from 'lucide-react';
 import CloserLookCarousel from '@/components/site/CloserLookCarousel';
 import HeritageHero from '@/components/site/HeritageHero';
 import ProductCard from '@/components/site/ProductCard';
 import {
   homeBenefits,
   testimonials,
-  shopProducts,
 } from '@/src/data/mockData';
+import { getLiveShopProducts } from '@/src/lib/liveCatalog';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const shopProducts = await getLiveShopProducts();
   const bestSellerNames = [
     'Shahi Garam Masala',
     'Kanda Lasun Chutney',
@@ -24,6 +23,12 @@ export default function HomePage() {
   const bestSellerProducts = shopProducts.filter((product) =>
     bestSellerNames.includes(product.name)
   );
+
+  const benefitIcons = {
+    Purity: BadgeCheck,
+    Aroma: Wind,
+    'Hand-picked': Leaf,
+  } as const;
 
   return (
     <>
@@ -77,7 +82,7 @@ export default function HomePage() {
       </section>
 
       <section className="story-surface mx-2 rounded-3xl px-4 py-10 sm:mx-4 sm:px-6 sm:py-14 md:mx-6 md:px-8 md:py-20">
-        <div className="mx-auto grid max-w-screen-2xl grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-8 xl:gap-12">
+        <div className="mx-auto grid max-w-screen-2xl grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-8 xl:gap-12">
           {homeBenefits.map((benefit) => {
             const accentClass =
               benefit.accent === 'secondary'
@@ -85,17 +90,18 @@ export default function HomePage() {
                 : benefit.accent === 'primary'
                   ? 'bg-primary-container text-on-primary-container'
                   : 'bg-tertiary-container text-on-tertiary-container';
+            const BenefitIcon = benefitIcons[benefit.title as keyof typeof benefitIcons];
 
             return (
               <div
                 key={benefit.title}
-                className="flex flex-col items-center gap-2 rounded-2xl bg-white/65 px-2 py-4 text-center shadow-sm sm:gap-3 sm:rounded-3xl sm:px-6 sm:py-8"
+                className="flex flex-col items-center gap-3 rounded-2xl border border-white/55 bg-white/72 px-4 py-5 text-center shadow-[0_18px_40px_-34px_rgba(82,28,4,0.32)] backdrop-blur-sm sm:gap-4 sm:rounded-3xl sm:px-6 sm:py-8"
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full shadow-sm sm:h-16 sm:w-16 ${accentClass}`}>
-                  <span className="material-symbols-outlined text-xl sm:text-3xl">{benefit.icon}</span>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm sm:h-16 sm:w-16 ${accentClass}`}>
+                  <BenefitIcon className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.2} />
                 </div>
-                <h4 className="font-headline text-sm sm:text-xl">{benefit.title}</h4>
-                <p className="hidden max-w-xs text-sm leading-6 text-on-surface-variant sm:block">
+                <h4 className="font-headline text-base sm:text-xl">{benefit.title}</h4>
+                <p className="max-w-xs text-sm leading-6 text-on-surface-variant sm:text-base">
                   {benefit.description}
                 </p>
               </div>
@@ -221,18 +227,18 @@ export default function HomePage() {
           </div>
 
           {/* Centered Callout Card - Burgundy and Gold theme */}
-          <div className="relative mt-14 overflow-hidden rounded-lg border-t-4 border-[#E8A800]/60 bg-gradient-to-r from-[#8b1d1d] to-[#a04100] p-6 text-white sm:mt-20 sm:p-8 md:mt-32 md:p-20">
+          <div className="relative mt-10 overflow-hidden rounded-[1.4rem] border border-[#E8A800]/35 border-t-2 bg-gradient-to-r from-[#8b1d1d] to-[#a04100] px-5 py-6 text-white shadow-[0_18px_38px_-30px_rgba(92,31,16,0.85)] sm:mt-14 sm:px-8 sm:py-8 md:mt-16 md:px-10 md:py-10">
             <div className="absolute inset-0 opacity-10 pointer-events-none" />
-            <div className="relative z-10 mx-auto max-w-3xl space-y-5 text-center sm:space-y-6 md:space-y-8">
-              <Leaf className="mx-auto h-10 w-10 text-[#E8A800] sm:h-12 sm:w-12" />
-              <h3 className="text-2xl font-serif text-[#E8A800] sm:text-3xl md:text-4xl">A Commitment to Heritage</h3>
-              <p className="text-sm font-light leading-7 text-[#f9f3eb] sm:text-base sm:leading-8 md:text-lg md:leading-loose">
+            <div className="relative z-10 mx-auto max-w-3xl space-y-4 text-center sm:space-y-5">
+              <Leaf className="mx-auto h-8 w-8 text-[#E8A800] sm:h-10 sm:w-10" />
+              <h3 className="text-xl font-serif text-[#E8A800] sm:text-2xl md:text-3xl">A Commitment to Heritage</h3>
+              <p className="text-sm font-light leading-6 text-[#f9f3eb] sm:text-[15px] sm:leading-7 md:text-base md:leading-8">
                 Veritraa is more than a spice brand; it&rsquo;s a bridge between the hardworking farmers of India and your kitchen. We celebrate the alchemy of tradition and science to bring you the purest flavors.
               </p>
-              <div className="flex flex-wrap justify-center gap-3 pt-4 sm:gap-4 sm:pt-6">
-                <span className="rounded-full border border-[#E8A800]/40 bg-[#E8A800]/20 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#E8A800] sm:px-6 sm:text-xs">Direct From Farmers</span>
-                <span className="rounded-full border border-[#E8A800]/40 bg-[#E8A800]/20 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#E8A800] sm:px-6 sm:text-xs">Lab Tested Purity</span>
-                <span className="rounded-full border border-[#E8A800]/40 bg-[#E8A800]/20 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#E8A800] sm:px-6 sm:text-xs">Women-Led Supply</span>
+              <div className="flex flex-wrap justify-center gap-2 pt-3 sm:gap-3 sm:pt-4">
+                <span className="rounded-full border border-[#E8A800]/40 bg-[#E8A800]/18 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#E8A800] sm:px-5 sm:text-xs">Direct From Farmers</span>
+                <span className="rounded-full border border-[#E8A800]/40 bg-[#E8A800]/18 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#E8A800] sm:px-5 sm:text-xs">Lab Tested Purity</span>
+                <span className="rounded-full border border-[#E8A800]/40 bg-[#E8A800]/18 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#E8A800] sm:px-5 sm:text-xs">Women-Led Supply</span>
               </div>
             </div>
           </div>
@@ -254,17 +260,9 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:hidden">
+          <div className="no-scrollbar grid grid-flow-col auto-cols-[46%] gap-3 overflow-x-auto pb-1 sm:auto-cols-[35%] sm:gap-4 md:auto-cols-[28%] md:gap-5 lg:auto-cols-[22%]">
             {bestSellerProducts.map((product) => (
-              <div key={product.name} className="min-w-[78%] snap-start">
-                <ProductCard href={`/shop/${product.slug}`} product={product} variant="preview" />
-              </div>
-            ))}
-          </div>
-
-          <div className="hidden grid-cols-2 gap-3 min-[520px]:grid-cols-3 sm:grid sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
-            {bestSellerProducts.map((product) => (
-              <ProductCard key={product.name} href={`/shop/${product.slug}`} product={product} variant="preview" />
+              <ProductCard key={product.name} href={`/shop/${product.slug}`} product={product} variant="preview" compact={true} />
             ))}
           </div>
 
@@ -316,10 +314,12 @@ export default function HomePage() {
           </div>
 
           <div className="relative overflow-hidden rounded-2xl shadow-xl">
-            <img
+            <Image
               alt="Veritraa heritage"
               className="h-full w-full object-cover"
               src="/quality-section.png"
+              width={1536}
+              height={1024}
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#4f1d0c]/40 via-transparent to-transparent" />
           </div>
@@ -328,22 +328,26 @@ export default function HomePage() {
 
       <section className="story-surface mx-2 mb-6 rounded-3xl py-14 sm:mx-4 sm:py-16 md:mx-6 md:py-24">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-8">
-          <div className="mb-10 flex flex-col items-center text-center sm:mb-12 md:mb-16">
-            <span className="material-symbols-outlined mb-4 text-4xl text-primary">
-              format_quote
-            </span>
-            <h2 className="font-headline text-2xl sm:text-3xl">What Our Patrons Say</h2>
+          <div className="mb-8 flex flex-col gap-3 sm:mb-10 md:mb-12 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#a04100]">Patron Stories</p>
+              <h2 className="mt-2 font-headline text-2xl text-on-background sm:text-3xl">What Our Patrons Say</h2>
+            </div>
+            <p className="max-w-xl text-sm leading-6 text-on-surface-variant sm:text-base">
+              Trusted by home cooks, food creators, and kitchen professionals who value flavor, consistency, and purity.
+            </p>
           </div>
 
-          <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:hidden">
+          <div className="grid gap-4 md:grid-cols-3 md:gap-6">
             {testimonials.map((testimonial) => (
-              <div
+              <article
                 key={testimonial.name}
-                className="min-w-[86%] snap-start rounded-[1.35rem] border border-[#dcc8b8]/65 bg-[#fffaf4] p-6 shadow-[0_18px_30px_-28px_rgba(52,26,14,0.85)]"
+                className={`overflow-hidden rounded-[1.5rem] border border-[#dcc8b8]/75 bg-[linear-gradient(180deg,rgba(255,251,245,0.95),rgba(246,232,214,0.92))] p-6 shadow-[0_18px_40px_-34px_rgba(92,31,16,0.45)] sm:p-7 ${testimonial.featured ? 'md:-mt-2 md:scale-[1.02] md:shadow-[0_24px_54px_-34px_rgba(92,31,16,0.58)]' : ''}`}
               >
-                <p className="mb-5 text-sm italic leading-7 text-[#4d3328]">{`"${testimonial.quote}"`}</p>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ead7c8] font-bold text-[#7f2f12]">
+                <MessageSquareQuote className="h-7 w-7 text-[#a04100]/55" strokeWidth={1.8} />
+                <p className="mt-4 text-sm leading-7 text-[#4d3328] sm:text-base">{`“${testimonial.quote}”`}</p>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#ead7c8] font-bold text-[#7f2f12]">
                     {testimonial.initial}
                   </div>
                   <div>
@@ -351,29 +355,7 @@ export default function HomePage() {
                     <p className="text-xs text-[#7f5a4a]">{testimonial.role}</p>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="hidden grid-cols-1 gap-4 sm:grid sm:grid-cols-2 md:grid-cols-3 md:gap-8">
-            {testimonials.map((testimonial) => (
-              <div
-                key={testimonial.name}
-                className={`rounded-[1.5rem] border border-outline-variant/10 bg-surface-container-lowest p-8 shadow-sm ${
-                  testimonial.featured ? 'z-10 md:scale-[1.03]' : ''
-                }`}
-              >
-                <p className="mb-6 text-sm italic leading-7 text-on-surface">{`"${testimonial.quote}"`}</p>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container font-bold text-primary">
-                    {testimonial.initial}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold">{testimonial.name}</p>
-                    <p className="text-xs text-on-surface-variant">{testimonial.role}</p>
-                  </div>
-                </div>
-              </div>
+              </article>
             ))}
           </div>
         </div>

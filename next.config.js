@@ -1,11 +1,30 @@
 /** @type {import('next').NextConfig} */
+const shopifyHostname = process.env.SHOPIFY_STORE_DOMAIN;
+
 const nextConfig = {
   images: {
-    unoptimized: true,
-    domains: ['images.unsplash.com', 'via.placeholder.com'],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+      },
+      ...(shopifyHostname
+        ? [
+            {
+              protocol: 'https',
+              hostname: shopifyHostname,
+            },
+            {
+              protocol: 'https',
+              hostname: 'cdn.shopify.com',
+            },
+          ]
+        : []),
+    ],
   },
   async headers() {
     return [
@@ -14,7 +33,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

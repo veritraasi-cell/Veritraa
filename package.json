@@ -8,24 +8,35 @@
     "dev:live": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"while ($true) { npm run dev; Write-Host 'Dev server exited. Restarting in 2 seconds...'; Start-Sleep -Seconds 2 }\"",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "dependencies": {
-    "react": "^18",
-    "react-dom": "^18",
-    "next": "^14",
-    "zustand": "^4",
-    "lucide-react": "^0.294.0"
+    "@shopify/admin-api-client": "^1.1.2",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "firebase": "^12.12.0",
+    "firebase-admin": "^13.8.0",
+    "jose": "^6.2.2",
+    "lucide-react": "^1.8.0",
+    "next": "^16.2.3",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "tsx": "^4.21.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "@types/node": "^20",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.3",
     "postcss": "^8",
     "tailwindcss": "^3",
-    "eslint": "^8",
-    "eslint-config-next": "^14"
+    "typescript": "^5"
   }
 }

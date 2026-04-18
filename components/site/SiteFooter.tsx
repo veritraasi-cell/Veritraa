@@ -1,9 +1,7 @@
 import Link from 'next/link';
 import { Globe, Mail, Phone } from 'lucide-react';
 
-interface SiteFooterProps {}
-
-export default function SiteFooter(_: Readonly<SiteFooterProps>) {
+export default function SiteFooter() {
   return (
     <footer className="w-full border-t border-[#d4a900]/40 bg-[#5f0808]/95 px-4 py-4 text-[#d9b43a] sm:px-5 sm:py-5 md:px-8 md:py-7">
       <div className="mx-auto max-w-screen-xl">

@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server';
 import {
   addProductImage,
   bulkUpdateProductVariants,
-  createShopifyProduct,
-  deleteShopifyProduct,
-  getShopifyCustomerDetail,
-  getShopifyLocations,
-  getShopifyOrderDetail,
-  getShopifyProductDetail,
-  setInventoryQuantity,
-  updateShopifyCustomer,
-  updateShopifyOrder,
-} from '@/src/lib/shopifyAdmin';
+} from '@/lib/shopify/mutations/catalog';
+import { updateCustomer } from '@/lib/shopify/mutations/customers';
+import { setInventoryQuantity } from '@/lib/shopify/mutations/inventory';
+import { updateOrder } from '@/lib/shopify/mutations/orders';
+import { createProduct, deleteProduct } from '@/lib/shopify/mutations/products';
+import { pushCatalogProductToShopify } from '@/lib/shopify/catalog-sync';
+import { getCustomer } from '@/lib/shopify/queries/customers';
+import { listLocations } from '@/lib/shopify/queries/locations';
+import { getOrder } from '@/lib/shopify/queries/orders';
+import { getProduct, searchProducts } from '@/lib/shopify/queries/products';
+import { createCatalogProduct, updateCatalogProduct } from '@/src/lib/catalog';
 
 function ok<T>(data: T) {
   return NextResponse.json({ ok: true, data });
@@ -57,6 +58,45 @@ function parsePriceRows(value: unknown): Array<{ id: string; price?: string; com
     });
 }
 
+function parseCsvList(value: unknown) {
+  if (typeof value !== 'string') {
+    return [];
+  }
+
+  return value
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function parseVariantDefinitions(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') {
+        return null;
+      }
+
+      const label = String((entry as Record<string, unknown>).label ?? '').trim();
+      const price = String((entry as Record<string, unknown>).price ?? '').trim();
+      const quantityValue = Number((entry as Record<string, unknown>).quantity);
+
+      if (!label || !price) {
+        return null;
+      }
+
+      return {
+        label,
+        price,
+        quantity: Number.isFinite(quantityValue) ? quantityValue : undefined,
+      };
+    })
+    .filter(Boolean) as Array<{ label: string; price: string; quantity?: number }>;
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const action = url.searchParams.get('action');
@@ -69,11 +109,22 @@ export async function GET(request: Request) {
       }
 
       const [product, locations] = await Promise.all([
-        getShopifyProductDetail(id),
-        getShopifyLocations(),
+        getProduct(id),
+        listLocations(),
       ]);
 
       return ok({ product, locations });
+    }
+
+    if (action === 'product-search') {
+      const query = url.searchParams.get('query')?.trim();
+
+      if (!query) {
+        return fail('Missing product search query.');
+      }
+
+      const products = await searchProducts(query);
+      return ok({ products: products.nodes });
     }
 
     if (action === 'order') {
@@ -81,7 +132,7 @@ export async function GET(request: Request) {
         return fail('Missing order id.');
       }
 
-      const order = await getShopifyOrderDetail(id);
+      const order = await getOrder(id);
       return ok({ order });
     }
 
@@ -90,12 +141,12 @@ export async function GET(request: Request) {
         return fail('Missing customer id.');
       }
 
-      const customer = await getShopifyCustomerDetail(id);
+      const customer = await getCustomer(id);
       return ok({ customer });
     }
 
     if (action === 'locations') {
-      const locations = await getShopifyLocations();
+      const locations = await listLocations();
       return ok({ locations });
     }
 
@@ -135,7 +186,7 @@ export async function POST(request: Request) {
 
       const mediaUrl = String(body.mediaUrl ?? '').trim();
       const mediaAlt = String(body.mediaAlt ?? '').trim();
-      const product = await createShopifyProduct({
+      const product = await createProduct({
         title,
         descriptionHtml: String(body.descriptionHtml ?? '').trim() || undefined,
         vendor: String(body.vendor ?? '').trim() || undefined,
@@ -177,7 +228,7 @@ export async function POST(request: Request) {
         return fail('Product id is required.');
       }
 
-      const deletedProductId = await deleteShopifyProduct(productId);
+      const deletedProductId = await deleteProduct(productId);
       return ok({ deletedProductId });
     }
 
@@ -205,7 +256,7 @@ export async function POST(request: Request) {
         return fail('Order id is required.');
       }
 
-      const result = await updateShopifyOrder({
+      const result = await updateOrder({
         orderId,
         email: String(body.email ?? '').trim() || undefined,
         tags: parseTags(body.tags),
@@ -220,7 +271,7 @@ export async function POST(request: Request) {
         return fail('Customer id is required.');
       }
 
-      const result = await updateShopifyCustomer({
+      const result = await updateCustomer({
         customerId,
         firstName: String(body.firstName ?? '').trim() || undefined,
         lastName: String(body.lastName ?? '').trim() || undefined,
@@ -230,6 +281,93 @@ export async function POST(request: Request) {
       });
 
       return ok({ result });
+    }
+
+    if (action === 'push-local-product') {
+      const slug = String(body.slug ?? '').trim();
+      if (!slug) {
+        return fail('Product slug is required.');
+      }
+
+      const result = await pushCatalogProductToShopify(slug);
+      return ok({ result });
+    }
+
+    if (action === 'create-and-push-catalog-product') {
+      const name = String(body.name ?? '').trim();
+      const description = String(body.description ?? '').trim();
+      const image = String(body.image ?? '').trim();
+
+      if (!name || !description || !image) {
+        return fail('Name, description, and image path are required.');
+      }
+
+      const product = await createCatalogProduct({
+        slug: String(body.slug ?? '').trim() || undefined,
+        shopifyHandle: String(body.shopifyHandle ?? '').trim() || undefined,
+        name,
+        description,
+        image,
+        sizes: parseCsvList(body.sizes),
+        highlights: parseCsvList(body.highlights),
+        vendor: String(body.vendor ?? '').trim() || undefined,
+        productType: String(body.productType ?? '').trim() || undefined,
+        categoryName: String(body.categoryName ?? '').trim() || undefined,
+        tags: parseCsvList(body.tags),
+        price: String(body.price ?? '').trim() || undefined,
+        quantity: Number(body.quantity),
+        imageAlt: String(body.imageAlt ?? '').trim() || undefined,
+        variantDefinitions: parseVariantDefinitions(body.variantDefinitions),
+        tagLabel: String(body.tagLabel ?? '').trim() || undefined,
+      });
+
+      const result = await pushCatalogProductToShopify(product.slug, product);
+      return ok({ product, result });
+    }
+
+    if (action === 'update-and-push-catalog-product') {
+      const originalSlug = String(body.originalSlug ?? '').trim();
+      const name = String(body.name ?? '').trim();
+      const description = String(body.description ?? '').trim();
+      const image = String(body.image ?? '').trim();
+
+      if (!originalSlug) {
+        return fail('Original product slug is required.');
+      }
+
+      if (!name || !description || !image) {
+        return fail('Name, description, and image path are required.');
+      }
+
+      const product = await updateCatalogProduct(originalSlug, {
+        name,
+        description,
+        image,
+        sizes: parseVariantDefinitions(body.variantDefinitions).map((variant) => variant.label),
+        highlights: parseCsvList(body.highlights),
+        vendor: String(body.vendor ?? '').trim() || undefined,
+        productType: String(body.productType ?? '').trim() || undefined,
+        categoryName: String(body.categoryName ?? '').trim() || undefined,
+        tags: parseCsvList(body.tags),
+        quantity: Number(body.quantity),
+        imageAlt: String(body.imageAlt ?? '').trim() || undefined,
+        variantDefinitions: parseVariantDefinitions(body.variantDefinitions),
+        tagLabel: String(body.tagLabel ?? '').trim() || undefined,
+      });
+
+      const result = await pushCatalogProductToShopify(product.slug, product);
+      return ok({ product, result });
+    }
+
+    if (action === 'delete-catalog-product') {
+      const productId = String(body.productId ?? '').trim();
+
+      if (!productId) {
+        return fail('Product id is required.');
+      }
+
+      const deletedProductId = await deleteProduct(productId);
+      return ok({ deletedProductId, removedLocal: false });
     }
 
     return fail('Unsupported admin action.', 404);

@@ -1,0 +1,409 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  STAFF
+  VIEWER
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FLAGGED
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PromotionType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SHIPPING
+  BUY_X_GET_Y
+  BUNDLE
+}
+
+model AdminUser {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String
+  name         String
+  role         AdminRole    @default(STAFF)
+  avatar       String?
+  isActive     Boolean      @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  sessions     AdminSession[]
+  activityLogs ActivityLog[]
+  notifications AdminNotification[]
+
+  @@map("admin_users")
+}
+
+model AdminSession {
+  id           String    @id @default(cuid())
+  sessionToken String    @unique
+  adminId      String
+  admin        AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime  @default(now())
+
+  @@index([adminId])
+  @@index([expiresAt])
+  @@map("admin_sessions")
+}
+
+model ActivityLog {
+  id          String    @id @default(cuid())
+  adminId     String
+  admin       AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action      String
+  entityType  String?
+  entityId    String?
+  details     Json?
+  ipAddress   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([adminId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+model CustomerProfile {
+  id                String   @id @default(cuid())
+  shopifyCustomerId String   @unique
+  email             String   @unique
+  phone             String?
+  dateOfBirth       DateTime?
+  gender            String?
+  preferences       Json?
+  tags              String[]
+  notes             String?
+  loyaltyPoints     Int      @default(0)
+  totalSpent        Decimal  @default(0) @db.Decimal(10, 2)
+  orderCount        Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  wishlist          WishlistItem[]
+  reviews           Review[]
+  addresses         SavedAddress[]
+  notifications     CustomerNotification[]
+
+  @@index([shopifyCustomerId])
+  @@index([email])
+  @@map("customer_profiles")
+}
+
+model SavedAddress {
+  id         String          @id @default(cuid())
+  customerId String
+  customer   CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  label      String?
+  firstName  String
+  lastName   String
+  address1   String
+  address2   String?
+  city       String
+  state      String
+  pincode    String
+  country    String          @default("India")
+  phone      String?
+  isDefault  Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([customerId])
+  @@map("saved_addresses")
+}
+
+model Review {
+  id                String          @id @default(cuid())
+  shopifyProductId  String
+  customerId        String?
+  customer          CustomerProfile? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerName      String
+  customerEmail     String
+  rating            Int
+  title             String?
+  body              String
+  images            String[]
+  isVerifiedPurchase Boolean        @default(false)
+  status            ReviewStatus    @default(PENDING)
+  adminResponse     String?
+  helpfulCount      Int             @default(0)
+  reportCount       Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([shopifyProductId])
+  @@index([status])
+  @@index([rating])
+  @@map("reviews")
+}
+
+model WishlistItem {
+  id               String          @id @default(cuid())
+  customerId       String
+  customer         CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  shopifyProductId String
+  shopifyVariantId String?
+  addedAt          DateTime        @default(now())
+
+  @@unique([customerId, shopifyProductId, shopifyVariantId])
+  @@index([shopifyProductId])
+  @@map("wishlist_items")
+}
+
+model Page {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  content     Json
+  excerpt     String?
+  metaTitle   String?
+  metaDesc    String?
+  status      PageStatus @default(DRAFT)
+  template    String?
+  sortOrder   Int        @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([status, sortOrder])
+  @@map("pages")
+}
+
+model BlogPost {
+  id           String     @id @default(cuid())
+  title        String
+  slug         String     @unique
+  content      Json
+  excerpt      String?
+  featuredImage String?
+  author       String
+  tags         String[]
+  category     String?
+  metaTitle    String?
+  metaDesc     String?
+  status       PageStatus @default(DRAFT)
+  publishedAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([status, publishedAt])
+  @@map("blog_posts")
+}
+
+model Promotion {
+  id              String         @id @default(cuid())
+  name            String
+  code            String?        @unique
+  type            PromotionType
+  value           Decimal        @db.Decimal(10, 2)
+  minOrderValue   Decimal?       @db.Decimal(10, 2)
+  maxDiscount     Decimal?       @db.Decimal(10, 2)
+  usageLimit      Int?
+  usageCount      Int            @default(0)
+  perCustomerLimit Int?
+  applicableTo    Json?
+  excludeFrom     Json?
+  startDate       DateTime
+  endDate         DateTime?
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  usages          PromotionUsage[]
+
+  @@map("promotions")
+}
+
+model PromotionUsage {
+  id             String    @id @default(cuid())
+  promotionId    String
+  promotion      Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  shopifyOrderId String
+  customerEmail  String
+  discountAmount Decimal   @db.Decimal(10, 2)
+  usedAt         DateTime  @default(now())
+
+  @@index([promotionId])
+  @@index([shopifyOrderId])
+  @@map("promotion_usages")
+}
+
+model ShippingZone {
+  id         String        @id @default(cuid())
+  name       String
+  pincodes   String[]
+  states     String[]
+  isActive   Boolean       @default(true)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  rates      ShippingRate[]
+
+  @@map("shipping_zones")
+}
+
+model ShippingRate {
+  id            String       @id @default(cuid())
+  zoneId        String
+  zone          ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  name          String
+  minWeight     Decimal?     @db.Decimal(10, 2)
+  maxWeight     Decimal?     @db.Decimal(10, 2)
+  minOrderValue Decimal?     @db.Decimal(10, 2)
+  price         Decimal      @db.Decimal(10, 2)
+  estimatedDays String?
+  isFreeAbove   Decimal?     @db.Decimal(10, 2)
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([zoneId])
+  @@map("shipping_rates")
+}
+
+model PincodeServiceability {
+  id           String   @id @default(cuid())
+  pincode      String   @unique
+  city         String?
+  state        String?
+  isCOD        Boolean  @default(false)
+  isPrepaid    Boolean  @default(true)
+  isActive     Boolean  @default(true)
+  deliveryDays Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([pincode])
+  @@map("pincode_serviceability")
+}
+
+model AdminNotification {
+  id        String     @id @default(cuid())
+  adminId   String?
+  admin     AdminUser? @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean    @default(false)
+  readAt    DateTime?
+  createdAt DateTime   @default(now())
+
+  @@index([adminId, isRead])
+  @@map("admin_notifications")
+}
+
+model CustomerNotification {
+  id         String          @id @default(cuid())
+  customerId String
+  customer   CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type       String
+  title      String
+  message    String
+  data       Json?
+  isRead     Boolean         @default(false)
+  sentVia    String[]
+  createdAt  DateTime        @default(now())
+
+  @@index([customerId, isRead])
+  @@map("customer_notifications")
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  sessionId  String?
+  customerId String?
+  eventType  String
+  page       String?
+  productId  String?
+  data       Json?
+  referrer   String?
+  userAgent  String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([sessionId])
+  @@index([productId])
+  @@map("analytics_events")
+}
+
+model DailySalesSnapshot {
+  id            String   @id @default(cuid())
+  date          DateTime @unique @db.Date
+  totalOrders   Int      @default(0)
+  totalRevenue  Decimal  @default(0) @db.Decimal(12, 2)
+  totalItems    Int      @default(0)
+  avgOrderValue Decimal  @default(0) @db.Decimal(10, 2)
+  newCustomers  Int      @default(0)
+  topProducts   Json?
+  createdAt     DateTime @default(now())
+
+  @@map("daily_sales_snapshots")
+}
+
+model MediaFile {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  width     Int?
+  height    Int?
+  alt       String?
+  folder    String?
+  tags      String[]
+  createdAt DateTime @default(now())
+
+  @@map("media_files")
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  group     String?
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Banner {
+  id          String    @id @default(cuid())
+  title       String
+  subtitle    String?
+  imageUrl    String
+  mobileImage String?
+  linkUrl     String?
+  position    String
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("banners")
+}
