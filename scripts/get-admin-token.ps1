@@ -6,7 +6,9 @@ param(
   [string]$ClientId,
 
   [Parameter(Mandatory = $true)]
-  [string]$ClientSecret
+  [string]$ClientSecret,
+
+  [string]$Scopes = 'read_products,write_products,read_orders,write_orders,read_customers,write_customers,read_locations,read_inventory,write_inventory,read_files,write_files'
 )
 
 $ErrorActionPreference = "Stop"

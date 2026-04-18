@@ -233,9 +233,19 @@ async function uploadImageToShopify(file: File, filename: string) {
         files {
           __typename
           ... on MediaImage {
+            id
             image {
               url
             }
+          }
+          ... on Video {
+            id
+          }
+          ... on Model3d {
+            id
+          }
+          ... on ExternalVideo {
+            id
           }
         }
         userErrors {
@@ -248,7 +258,7 @@ async function uploadImageToShopify(file: File, filename: string) {
 
   const fileCreateData = await shopifyGraphQL<{
     fileCreate: {
-      files: Array<{ __typename: string; image?: { url: string } | null } | null>;
+      files: Array<{ __typename?: string; image?: { url?: string } | null; id?: string } | null>;
       userErrors: Array<{ field?: string[] | null; message: string }>;
     };
   }>(fileCreateMutation, {
@@ -265,11 +275,22 @@ async function uploadImageToShopify(file: File, filename: string) {
     throw new Error(fileCreateError);
   }
 
-  const createdFile = fileCreateData.fileCreate.files[0] ?? null;
-  const cdnUrl = createdFile?.image?.url ?? '';
+  const createdFile = fileCreateData.fileCreate.files?.[0];
+  if (!createdFile) {
+    console.error('fileCreate response had no files:', JSON.stringify(fileCreateData, null, 2));
+    throw new Error('Shopify fileCreate returned empty files array.');
+  }
+
+  const cdnUrl = createdFile?.image?.url?.trim();
 
   if (!cdnUrl) {
-    throw new Error('Shopify did not return an image URL after upload.');
+    console.error(
+      'fileCreate returned file but no image.url:',
+      JSON.stringify({ __typename: createdFile.__typename, image: createdFile.image, id: createdFile.id }, null, 2)
+    );
+    throw new Error(
+      `Shopify fileCreate returned file but no image URL. Type: ${createdFile.__typename || 'unknown'}`
+    );
   }
 
   return cdnUrl;
