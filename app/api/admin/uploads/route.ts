@@ -236,6 +236,12 @@ async function uploadImageToShopify(file: File, filename: string) {
             id
             image {
               url
+              altText
+            }
+            preview {
+              image {
+                url
+              }
             }
           }
           ... on Video {
@@ -258,14 +264,18 @@ async function uploadImageToShopify(file: File, filename: string) {
 
   const fileCreateData = await shopifyGraphQL<{
     fileCreate: {
-      files: Array<{ __typename?: string; image?: { url?: string } | null; id?: string } | null>;
+      files: Array<{
+        __typename?: string;
+        id?: string;
+        image?: { url?: string; altText?: string } | null;
+        preview?: { image?: { url?: string } | null } | null;
+      } | null>;
       userErrors: Array<{ field?: string[] | null; message: string }>;
     };
   }>(fileCreateMutation, {
     files: [
       {
         originalSource: stagedTarget.resourceUrl,
-        contentType: 'IMAGE',
       },
     ],
   });
@@ -281,15 +291,25 @@ async function uploadImageToShopify(file: File, filename: string) {
     throw new Error('Shopify fileCreate returned empty files array.');
   }
 
-  const cdnUrl = createdFile?.image?.url?.trim();
+  // Try to get URL from image.url first, then fall back to preview.image.url
+  let cdnUrl = createdFile?.image?.url?.trim() || createdFile?.preview?.image?.url?.trim();
 
   if (!cdnUrl) {
     console.error(
-      'fileCreate returned file but no image.url:',
-      JSON.stringify({ __typename: createdFile.__typename, image: createdFile.image, id: createdFile.id }, null, 2)
+      'fileCreate returned file but no image URL in either image.url or preview.image.url:',
+      JSON.stringify(
+        {
+          __typename: createdFile.__typename,
+          id: createdFile.id,
+          image: createdFile.image,
+          preview: createdFile.preview,
+        },
+        null,
+        2
+      )
     );
     throw new Error(
-      `Shopify fileCreate returned file but no image URL. Type: ${createdFile.__typename || 'unknown'}`
+      `Shopify fileCreate returned file but no image URL. Type: ${createdFile.__typename || 'unknown'}. Full response: ${JSON.stringify(createdFile)}`
     );
   }
 
