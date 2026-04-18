@@ -291,25 +291,36 @@ async function uploadImageToShopify(file: File, filename: string) {
     throw new Error('Shopify fileCreate returned empty files array.');
   }
 
-  // Try to get URL from image.url first, then fall back to preview.image.url
+  // Shopify may not have processed the image metadata immediately after creation.
+  // The staged upload's resourceUrl is the actual CDN URL we can use.
   let cdnUrl = createdFile?.image?.url?.trim() || createdFile?.preview?.image?.url?.trim();
 
   if (!cdnUrl) {
+    console.warn(
+      'fileCreate image.url is null (Shopify still processing). Using staged upload resourceUrl instead:',
+      stagedTarget.resourceUrl
+    );
+    // Fallback to the resourceUrl from the staged upload, which is the final CDN URL
+    cdnUrl = stagedTarget.resourceUrl?.trim();
+  }
+
+  if (!cdnUrl) {
     console.error(
-      'fileCreate returned file but no image URL in either image.url or preview.image.url:',
+      'No URL available from fileCreate or staged upload:',
       JSON.stringify(
         {
           __typename: createdFile.__typename,
           id: createdFile.id,
           image: createdFile.image,
           preview: createdFile.preview,
+          stagedResourceUrl: stagedTarget.resourceUrl,
         },
         null,
         2
       )
     );
     throw new Error(
-      `Shopify fileCreate returned file but no image URL. Type: ${createdFile.__typename || 'unknown'}. Full response: ${JSON.stringify(createdFile)}`
+      `Could not obtain image URL from Shopify. FileCreate returned: ${JSON.stringify(createdFile)}`
     );
   }
 
