@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { cache } from 'react';
 import { listProducts, getProduct } from '@/lib/shopify/queries/products';
 import type { ShopifyProductDetail, ShopifyProductSummary } from '@/lib/shopify/types';
 import { shopCategories, type ShopProduct } from '@/src/data/mockData';
@@ -115,32 +116,77 @@ function buildManagedCatalogProductFromShopify(
 }
 
 async function listAllShopifyProductSummaries() {
-  const summaries: ShopifyProductSummary[] = [];
-  let after: string | null = null;
+  try {
+    const summaries: ShopifyProductSummary[] = [];
+    let after: string | null = null;
 
-  do {
-    const page = await listProducts({ first: 100, after });
-    summaries.push(...page.nodes);
-    after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
-  } while (after);
+    do {
+      const page = await listProducts({ first: 100, after });
+      summaries.push(...page.nodes);
+      after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
+    } while (after);
 
-  return summaries;
+    return summaries;
+  } catch (error) {
+    console.error('Error fetching Shopify products:', error instanceof Error ? error.message : String(error));
+    return [];
+  }
 }
 
-export async function listCatalogProducts(cachedProducts?: ManagedCatalogProduct[]): Promise<ManagedCatalogProduct[]> {
-  if (cachedProducts) {
-    return cachedProducts;
+async function buildCatalogProductsWithBatching(
+  summaries: ShopifyProductSummary[]
+): Promise<ManagedCatalogProduct[]> {
+  if (summaries.length === 0) {
+    return [];
   }
 
-  const summaries = await listAllShopifyProductSummaries();
-  const products = await Promise.all(
-    summaries.map(async (summary) => {
-      const detail = await getProduct(summary.id);
-      return buildManagedCatalogProductFromShopify(summary, detail);
-    })
-  );
+  // Process products in batches of 5 to avoid overwhelming the API
+  const batchSize = 5;
+  const allProducts: ManagedCatalogProduct[] = [];
 
-  return products;
+  for (let i = 0; i < summaries.length; i += batchSize) {
+    const batch = summaries.slice(i, i + batchSize);
+    
+    try {
+      const batchResults = await Promise.allSettled(
+        batch.map(async (summary) => {
+          const detail = await getProduct(summary.id);
+          return buildManagedCatalogProductFromShopify(summary, detail);
+        })
+      );
+
+      allProducts.push(
+        ...batchResults
+          .filter((result) => result.status === 'fulfilled')
+          .map((result) => (result as PromiseFulfilledResult<ManagedCatalogProduct>).value)
+      );
+    } catch (batchError) {
+      console.error(`Error processing batch ${i / batchSize + 1}:`, batchError);
+    }
+  }
+
+  return allProducts;
+}
+
+// Use React's cache to memoize results within a request
+const getCachedCatalogProducts = cache(
+  async (cachedProducts?: ManagedCatalogProduct[]): Promise<ManagedCatalogProduct[]> => {
+    if (cachedProducts) {
+      return cachedProducts;
+    }
+
+    try {
+      const summaries = await listAllShopifyProductSummaries();
+      return await buildCatalogProductsWithBatching(summaries);
+    } catch (error) {
+      console.error('Error building catalog products:', error instanceof Error ? error.message : String(error));
+      return [];
+    }
+  }
+);
+
+export async function listCatalogProducts(cachedProducts?: ManagedCatalogProduct[]): Promise<ManagedCatalogProduct[]> {
+  return getCachedCatalogProducts(cachedProducts);
 }
 
 export async function getCatalogProductBySlug(slug: string, cachedProducts?: ManagedCatalogProduct[]) {
