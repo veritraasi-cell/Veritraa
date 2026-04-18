@@ -1,6 +1,5 @@
 import 'server-only';
 
-import { revalidateTag } from 'next/cache';
 import { setProductFeaturedImage } from '@/lib/shopify/mutations/catalog';
 import { activateInventoryAtLocation, setInventoryQuantity, updateInventoryTracking } from '@/lib/shopify/mutations/inventory';
 import { setProductWeightVariants } from '@/lib/shopify/mutations/product-set';
@@ -159,7 +158,6 @@ export async function pushCatalogProductToShopify(slug: string, productOverride?
       });
     }
 
-    revalidateTag('shopify:products');
 
     return {
       created: false,
@@ -214,7 +212,6 @@ export async function pushCatalogProductToShopify(slug: string, productOverride?
     });
   }
 
-  revalidateTag('shopify:products');
 
   return {
     created: true,
