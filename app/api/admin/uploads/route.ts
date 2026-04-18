@@ -227,7 +227,52 @@ async function uploadImageToShopify(file: File, filename: string) {
     );
   }
 
-  return stagedTarget.resourceUrl;
+  const fileCreateMutation = `
+    mutation FileCreate($files: [FileCreateInput!]!) {
+      fileCreate(files: $files) {
+        files {
+          __typename
+          ... on MediaImage {
+            image {
+              url
+            }
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const fileCreateData = await shopifyGraphQL<{
+    fileCreate: {
+      files: Array<{ __typename: string; image?: { url: string } | null } | null>;
+      userErrors: Array<{ field?: string[] | null; message: string }>;
+    };
+  }>(fileCreateMutation, {
+    files: [
+      {
+        originalSource: stagedTarget.resourceUrl,
+        contentType: 'IMAGE',
+      },
+    ],
+  });
+
+  const fileCreateError = formatShopifyUserErrors(fileCreateData.fileCreate.userErrors);
+  if (fileCreateError) {
+    throw new Error(fileCreateError);
+  }
+
+  const createdFile = fileCreateData.fileCreate.files[0] ?? null;
+  const cdnUrl = createdFile?.image?.url ?? '';
+
+  if (!cdnUrl) {
+    throw new Error('Shopify did not return an image URL after upload.');
+  }
+
+  return cdnUrl;
 }
 
 async function uploadImageToFirebase(file: File, objectPath: string) {

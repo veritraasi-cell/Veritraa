@@ -1,5 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
+    [Alias('ShopDomain', 'StoreDomain')]
     [string]$Shop,
 
     [Parameter(Mandatory = $true)]
@@ -10,7 +11,7 @@ param(
 
     [string]$RedirectUri = 'http://localhost:8085/callback',
 
-    [string]$Scopes = 'read_products,write_products,read_orders,write_orders,read_customers,write_customers,read_locations,read_inventory,write_inventory'
+    [string]$Scopes = 'read_products,write_products,read_orders,write_orders,read_customers,write_customers,read_locations,read_inventory,write_inventory,read_files,write_files'
 )
 
 $ErrorActionPreference = 'Stop'

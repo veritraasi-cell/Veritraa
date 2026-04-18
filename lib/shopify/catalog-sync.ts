@@ -1,6 +1,7 @@
 import 'server-only';
 
-import { addProductImage } from '@/lib/shopify/mutations/catalog';
+import { revalidateTag } from 'next/cache';
+import { setProductFeaturedImage } from '@/lib/shopify/mutations/catalog';
 import { activateInventoryAtLocation, setInventoryQuantity, updateInventoryTracking } from '@/lib/shopify/mutations/inventory';
 import { setProductWeightVariants } from '@/lib/shopify/mutations/product-set';
 import { createProduct, updateProduct } from '@/lib/shopify/mutations/products';
@@ -151,12 +152,14 @@ export async function pushCatalogProductToShopify(slug: string, productOverride?
       }
     }
 
-    if (imageSource && !updatedProduct.featuredImage) {
-      await addProductImage(updatedProduct.id, {
+    if (imageSource && updatedProduct.featuredImage?.url !== imageSource) {
+      await setProductFeaturedImage(updatedProduct.id, {
         originalSource: imageSource,
         alt: blueprint.imageAlt ?? blueprint.title,
       });
     }
+
+    revalidateTag('shopify:products');
 
     return {
       created: false,
@@ -205,11 +208,13 @@ export async function pushCatalogProductToShopify(slug: string, productOverride?
   }
 
   if (imageSource) {
-    await addProductImage(product.id, {
+    await setProductFeaturedImage(product.id, {
       originalSource: imageSource,
       alt: blueprint.imageAlt ?? blueprint.title,
     });
   }
+
+  revalidateTag('shopify:products');
 
   return {
     created: true,

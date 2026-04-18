@@ -2,7 +2,7 @@ import 'server-only';
 
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { shopifyGraphQL } from '@/lib/shopify/client';
+import { shopifyGraphQL, shopifyRest } from '@/lib/shopify/client';
 
 function formatUserErrors(userErrors?: Array<{ field?: string[] | null; message: string }>) {
   return userErrors?.map((entry) => entry.message).join('; ') ?? '';
@@ -94,6 +94,71 @@ async function createStagedImageSource(localPublicPath: string) {
   }
 
   return stagedTarget.resourceUrl;
+}
+
+function normalizeProductNumericId(productId: string) {
+  const trimmed = productId.trim();
+  const match = trimmed.match(/gid:\/\/shopify\/Product\/(\d+)$/i);
+
+  if (!match) {
+    throw new Error('Unable to resolve Shopify product id for REST image upload.');
+  }
+
+  return match[1];
+}
+
+export async function setProductFeaturedImage(
+  productId: string,
+  image: { originalSource: string; alt?: string }
+) {
+  const originalSource = image.originalSource.startsWith('/')
+    ? await createStagedImageSource(image.originalSource)
+    : image.originalSource;
+
+  const numericProductId = normalizeProductNumericId(productId);
+
+  const response = await shopifyRest<{
+    image?: {
+      id: number;
+      src?: string;
+      alt?: string | null;
+      position?: number;
+    };
+  }>(`/products/${numericProductId}/images.json`, {
+    method: 'POST',
+    body: JSON.stringify({
+      image: {
+        src: originalSource,
+        alt: image.alt,
+        position: 1,
+      },
+    }),
+  });
+
+  if (!response.image) {
+    throw new Error('Shopify did not return the created image payload.');
+  }
+
+  // Best-effort: ensure this image is first, which Shopify uses as the featured image in most themes.
+  try {
+    await shopifyRest<{ image?: { id: number } }>(
+      `/products/${numericProductId}/images/${response.image.id}.json`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          image: {
+            id: response.image.id,
+            position: 1,
+            alt: image.alt,
+          },
+        }),
+      }
+    );
+  } catch (error) {
+    console.warn('Shopify image reorder step failed:', error);
+  }
+
+  return response.image;
 }
 
 export async function bulkUpdateProductVariants(
