@@ -74,7 +74,7 @@ export default function AdminShell({
         />
 
         <aside
-          className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-[#e3c7ab] bg-[#fffaf4]/96 p-5 shadow-[0_24px_54px_-40px_rgba(63,28,16,0.55)] backdrop-blur transition-transform duration-300 lg:sticky lg:top-6 lg:z-auto lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-[#e3c7ab] bg-[#fffaf4]/96 p-5 shadow-[0_24px_54px_-40px_rgba(63,28,16,0.55)] backdrop-blur transition-transform duration-300 lg:static lg:translate-x-0 ${
             mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
         >
