@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquare,
   Package,
   Users,
   X,
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/customers', label: 'Customers', icon: Users },
+  { href: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
 ] as const;
 
 function isActivePath(currentPath: string, targetPath: string) {

@@ -1,16 +1,29 @@
-import AdminPlaceholderPage from '@/components/admin/AdminPlaceholderPage';
+import ReviewModerationPanel from '@/components/admin/ReviewModerationPanel';
+import { listAllProductReviews } from '@/lib/customer-store';
+import { listCatalogProducts } from '@/src/lib/catalog';
 
-export default function ReviewsAdminPage() {
+export default async function ReviewsAdminPage() {
+  const [reviews, catalogProducts] = await Promise.all([listAllProductReviews(), listCatalogProducts()]);
+  const productNameBySlug = new Map(catalogProducts.map((product) => [product.slug, product.name] as const));
+
+  const initialReviews = reviews.map((review) => ({
+    id: review.id,
+    productSlug: review.productSlug,
+    productName: productNameBySlug.get(review.productSlug) ?? review.productSlug,
+    customerName: review.customerName,
+    customerEmail: review.customerEmail,
+    customerPhone: review.customerPhone,
+    rating: review.rating,
+    comment: review.comment,
+    adminReply: review.adminReply,
+    adminReplyBy: review.adminReplyBy,
+    adminReplyAt: review.adminReplyAt ? review.adminReplyAt.toISOString() : null,
+    createdAt: review.createdAt.toISOString(),
+  }));
+
   return (
-    <AdminPlaceholderPage
-      eyebrow="Moderation"
-      title="Reviews"
-      description="This route can moderate product reviews, handle responses, and flag abusive or pending content."
-      stats={[
-        { label: 'Primary job', value: 'Moderate reviews', note: 'Approve, reject, respond, or remove reviews.' },
-        { label: 'Source of truth', value: 'Shop + site data', note: 'Reviews are handled outside Shopify core data.' },
-        { label: 'Next step', value: 'Queue + detail', note: 'Add a review table and side panel.' },
-      ]}
-    />
+    <section className="mx-auto max-w-[1600px]">
+      <ReviewModerationPanel initialReviews={initialReviews} />
+    </section>
   );
 }

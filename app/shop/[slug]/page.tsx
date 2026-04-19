@@ -71,6 +71,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     customerName: review.customerName,
     rating: review.rating,
     comment: review.comment,
+    adminReply: review.adminReply,
+    adminReplyBy: review.adminReplyBy,
+    adminReplyAt: review.adminReplyAt,
     createdAt: review.createdAt,
   }));
   const publicSession = authenticatedCustomerSession.customer

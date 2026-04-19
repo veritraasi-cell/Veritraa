@@ -15,6 +15,9 @@ type ProductReview = {
   customerName: string;
   rating: number;
   comment: string;
+  adminReply: string | null;
+  adminReplyBy: string | null;
+  adminReplyAt: string | Date | null;
   createdAt: string | Date;
 };
 
@@ -166,6 +169,14 @@ export default function ProductReviewsPanel({
                 <p className="text-sm font-semibold text-[#99461e]">{'★'.repeat(review.rating)}</p>
               </div>
               <p className="mt-3 text-sm leading-6 text-[#55433b]">{review.comment}</p>
+              {review.adminReply ? (
+                <div className="mt-4 rounded-2xl border border-[#e6cdb3] bg-white px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8a3a17]">
+                    {review.adminReplyBy ? `${review.adminReplyBy} replied` : 'Owner reply'}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[#55433b]">{review.adminReply}</p>
+                </div>
+              ) : null}
             </article>
           ))
         ) : (

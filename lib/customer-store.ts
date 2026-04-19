@@ -27,6 +27,9 @@ export interface ProductReview {
   customerPhotoURL: string | null;
   rating: number;
   comment: string;
+  adminReply: string | null;
+  adminReplyBy: string | null;
+  adminReplyAt: Date | null;
   createdAt: Date;
 }
 
@@ -71,6 +74,10 @@ function customersCollection() {
 
 function productReviewsCollection(productSlug: string) {
   return getFirebaseAdminDb().collection('products').doc(productSlug).collection('reviews');
+}
+
+function reviewDocument(productSlug: string, reviewId: string) {
+  return productReviewsCollection(productSlug).doc(reviewId);
 }
 
 function productLikesCollection(productSlug: string) {
@@ -141,6 +148,9 @@ function mapProductReview(snapshot: QueryDocumentSnapshot<DocumentData>) {
         : null,
     rating: Number(data.rating ?? 0),
     comment: String(data.comment ?? '').trim(),
+    adminReply: typeof data.adminReply === 'string' && data.adminReply.trim() ? data.adminReply.trim() : null,
+    adminReplyBy: typeof data.adminReplyBy === 'string' && data.adminReplyBy.trim() ? data.adminReplyBy.trim() : null,
+    adminReplyAt: toDate(data.adminReplyAt),
     createdAt: toDate(data.createdAt) ?? new Date(),
   } satisfies ProductReview;
 }
@@ -260,17 +270,71 @@ export async function listProductReviews(productSlug: string) {
   return snapshot.docs.map((entry) => mapProductReview(entry));
 }
 
-export async function createProductReview(input: Omit<ProductReview, 'id' | 'createdAt'>) {
+export async function createProductReview(
+  input: Omit<ProductReview, 'id' | 'createdAt' | 'adminReply' | 'adminReplyBy' | 'adminReplyAt'>
+) {
   const id = randomUUID();
   const review: ProductReview = {
     id,
     ...input,
     customerPhone: input.customerPhone?.trim() ?? null,
     customerPhotoURL: input.customerPhotoURL?.trim() ?? null,
+    adminReply: null,
+    adminReplyBy: null,
+    adminReplyAt: null,
     createdAt: new Date(),
   };
 
   await productReviewsCollection(input.productSlug).doc(id).set(review);
+  return review;
+}
+
+export async function listAllProductReviews() {
+  const snapshot = await getFirebaseAdminDb().collectionGroup('reviews').get();
+  return snapshot.docs
+    .map((entry) => mapProductReview(entry))
+    .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime());
+}
+
+export async function updateProductReviewReply(input: {
+  productSlug: string;
+  reviewId: string;
+  reply: string | null;
+  adminName: string;
+}) {
+  const ref = reviewDocument(input.productSlug, input.reviewId);
+  const snapshot = await ref.get();
+
+  if (!snapshot.exists) {
+    throw new Error('Review not found.');
+  }
+
+  const normalizedReply = input.reply?.trim() ?? '';
+  const nextReply = normalizedReply.length > 0 ? normalizedReply : null;
+
+  await ref.set(
+    {
+      adminReply: nextReply,
+      adminReplyBy: nextReply ? input.adminName.trim() || 'Admin' : null,
+      adminReplyAt: nextReply ? new Date() : null,
+    },
+    { merge: true }
+  );
+
+  const updatedSnapshot = await ref.get();
+  return mapProductReview(updatedSnapshot as QueryDocumentSnapshot<DocumentData>);
+}
+
+export async function deleteProductReview(input: { productSlug: string; reviewId: string }) {
+  const ref = reviewDocument(input.productSlug, input.reviewId);
+  const snapshot = await ref.get();
+
+  if (!snapshot.exists) {
+    throw new Error('Review not found.');
+  }
+
+  const review = mapProductReview(snapshot as QueryDocumentSnapshot<DocumentData>);
+  await ref.delete();
   return review;
 }
 
