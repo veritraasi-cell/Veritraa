@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import { listProductsWithDetails } from '@/lib/shopify/queries/products';
 import type { ShopifyCatalogProduct, ShopifyProductVariant } from '@/lib/shopify/types';
 import { shopCategories, type ShopProduct } from '@/src/data/mockData';
@@ -130,27 +131,8 @@ async function listAllShopifyProductsWithDetails(options?: { query?: string | nu
   }
 }
 
-const getCachedLiveCatalogProducts = cache(async (): Promise<ManagedCatalogProduct[]> => {
-  try {
-    const products = await listAllShopifyProductsWithDetails({ query: 'status:active' });
-    return products.map((product) => buildManagedCatalogProductFromShopify(product));
-  } catch (error) {
-    console.error('Error building live catalog products:', error instanceof Error ? error.message : String(error));
-    return [];
-  }
-});
-
-export async function listLiveCatalogProducts(): Promise<ManagedCatalogProduct[]> {
-  return getCachedLiveCatalogProducts();
-}
-
-// Use React's cache to memoize results within a request
-const getCachedCatalogProducts = cache(
-  async (cachedProducts?: ManagedCatalogProduct[]): Promise<ManagedCatalogProduct[]> => {
-    if (cachedProducts) {
-      return cachedProducts;
-    }
-
+const getCachedCatalogProducts = unstable_cache(
+  async (): Promise<ManagedCatalogProduct[]> => {
     try {
       const products = await listAllShopifyProductsWithDetails();
       return products.map((product) => buildManagedCatalogProductFromShopify(product));
@@ -158,15 +140,75 @@ const getCachedCatalogProducts = cache(
       console.error('Error building catalog products:', error instanceof Error ? error.message : String(error));
       return [];
     }
-  }
+  },
+  ['shopify-catalog-products'],
+  { revalidate: 120, tags: ['shopify:products'] }
 );
 
+const getCachedLiveCatalogProducts = unstable_cache(
+  async (): Promise<ManagedCatalogProduct[]> => {
+    try {
+      const products = await listAllShopifyProductsWithDetails({ query: 'status:active' });
+      return products.map((product) => buildManagedCatalogProductFromShopify(product));
+    } catch (error) {
+      console.error('Error building live catalog products:', error instanceof Error ? error.message : String(error));
+      return [];
+    }
+  },
+  ['shopify-live-catalog-products'],
+  { revalidate: 120, tags: ['shopify:products'] }
+);
+
+const getCachedCatalogProductBySlug = unstable_cache(
+  async (slug: string): Promise<ManagedCatalogProduct | null> => {
+    const normalizedSlug = slug.trim();
+
+    if (!normalizedSlug) {
+      return null;
+    }
+
+    try {
+      const products = await listProductsWithDetails({ first: 1, query: `handle:${normalizedSlug}` });
+      const product = products.nodes[0];
+
+      return product ? buildManagedCatalogProductFromShopify(product) : null;
+    } catch (error) {
+      console.error('Error resolving catalog product by slug:', error instanceof Error ? error.message : String(error));
+      return null;
+    }
+  },
+  ['shopify-catalog-product-by-slug'],
+  { revalidate: 120, tags: ['shopify:products'] }
+);
+
+const getRequestCachedCatalogProducts = cache(async (): Promise<ManagedCatalogProduct[]> => getCachedCatalogProducts());
+const getRequestCachedLiveCatalogProducts = cache(async (): Promise<ManagedCatalogProduct[]> => getCachedLiveCatalogProducts());
+const getRequestCachedCatalogProductBySlug = cache(async (slug: string) => getCachedCatalogProductBySlug(slug));
+
+export async function listLiveCatalogProducts(): Promise<ManagedCatalogProduct[]> {
+  return getRequestCachedLiveCatalogProducts();
+}
+
 export async function listCatalogProducts(cachedProducts?: ManagedCatalogProduct[]): Promise<ManagedCatalogProduct[]> {
-  return getCachedCatalogProducts(cachedProducts);
+  if (cachedProducts) {
+    return cachedProducts;
+  }
+
+  return getRequestCachedCatalogProducts();
 }
 
 export async function getCatalogProductBySlug(slug: string, cachedProducts?: ManagedCatalogProduct[]) {
-  const products = cachedProducts ?? (await listCatalogProducts());
+  if (cachedProducts) {
+    return cachedProducts.find((product) => product.slug === slug || product.shopifyHandle === slug) ?? null;
+  }
+
+  const directMatch = await getRequestCachedCatalogProductBySlug(slug);
+
+  if (directMatch) {
+    return directMatch;
+  }
+
+  const products = await getRequestCachedCatalogProducts();
   return products.find((product) => product.slug === slug || product.shopifyHandle === slug) ?? null;
 }
 

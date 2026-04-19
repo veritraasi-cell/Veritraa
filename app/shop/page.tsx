@@ -2,7 +2,6 @@ import ShopCatalogClient from '@/components/site/ShopCatalogClient';
 import CustomerAccessGate from '@/components/site/CustomerAccessGate';
 import { getCurrentCustomerSessionLite } from '@/lib/auth/customer-auth';
 import { listCatalogCategories, listLiveCatalogProducts } from '@/src/lib/catalog';
-import { getLiveShopProducts } from '@/src/lib/liveCatalog';
 import { cookies } from 'next/headers';
 
 export default async function ShopPage() {
@@ -19,9 +18,6 @@ export default async function ShopPage() {
   }
 
   const catalogProducts = await listLiveCatalogProducts();
-  const [products, categories] = await Promise.all([
-    getLiveShopProducts(catalogProducts),
-    listCatalogCategories(catalogProducts),
-  ]);
-  return <ShopCatalogClient products={products} categories={categories} />;
+  const categories = await listCatalogCategories(catalogProducts);
+  return <ShopCatalogClient products={catalogProducts} categories={categories} />;
 }

@@ -1,5 +1,8 @@
 import 'server-only';
 
+import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
+
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN?.trim();
 const SHOPIFY_STOREFRONT_ACCESS_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim();
 const SHOPIFY_STOREFRONT_API_VERSION = process.env.SHOPIFY_STOREFRONT_API_VERSION?.trim() ?? '2026-04';
@@ -182,74 +185,68 @@ function normalizeCart(
   } satisfies ShopifyCart;
 }
 
-export async function getStorefrontProductByHandle(handle: string) {
-  const query = `
-    query StorefrontProduct($handle: String!) {
-      product(handle: $handle) {
-        id
-        title
-        handle
-        description
-        featuredImage {
-          url
-          altText
-        }
-        variants(first: 25) {
-          nodes {
-            id
-            title
-            availableForSale
-            quantityAvailable
-            price {
-              amount
-              currencyCode
-            }
-            selectedOptions {
-              name
-              value
+const getCachedStorefrontProductByHandle = unstable_cache(
+  async (handle: string) => {
+    const normalizedHandle = handle.trim();
+
+    if (!normalizedHandle) {
+      return null;
+    }
+
+    const query = `
+      query StorefrontProduct($handle: String!) {
+        product(handle: $handle) {
+          id
+          title
+          handle
+          description
+          featuredImage {
+            url
+            altText
+          }
+          variants(first: 25) {
+            nodes {
+              id
+              title
+              availableForSale
+              quantityAvailable
+              price {
+                amount
+                currencyCode
+              }
+              selectedOptions {
+                name
+                value
+              }
             }
           }
         }
       }
-    }
-  `;
+    `;
 
-  const data = await storefrontGraphQL<{
-    product: {
-      id: string;
-      title: string;
-      handle: string;
-      description: string;
-      featuredImage: ShopifyStorefrontImage | null;
-      variants: {
-        nodes: ShopifyStorefrontVariant[];
-      };
-    } | null;
-  }>(query, { handle });
+    const data = await storefrontGraphQL<{
+      product: {
+        id: string;
+        title: string;
+        handle: string;
+        description: string;
+        featuredImage: ShopifyStorefrontImage | null;
+        variants: {
+          nodes: ShopifyStorefrontVariant[];
+        };
+      } | null;
+    }>(query, { handle: normalizedHandle });
 
-  return normalizeProduct(data.product);
-}
+    return normalizeProduct(data.product);
+  },
+  ['shopify-storefront-product-by-handle'],
+  { revalidate: 60, tags: ['shopify:storefront-products'] }
+);
 
-export async function listStorefrontProductHandles() {
-  const query = `
-    query StorefrontProductHandles {
-      products(first: 100) {
-        nodes {
-          id
-          handle
-          title
-        }
-      }
-    }
-  `;
+const getRequestCachedStorefrontProductByHandle = cache(async (handle: string) => getCachedStorefrontProductByHandle(handle));
 
-  const data = await storefrontGraphQL<{
-    products: {
-      nodes: ShopifyStorefrontProductSummary[];
-    };
-  }>(query);
-
-  return data.products.nodes.map((product) => product.handle);
+export async function getStorefrontProductByHandle(handle: string) {
+  return getRequestCachedStorefrontProductByHandle(handle);
 }
 
 export async function createCart(lines: Array<{ merchandiseId: string; quantity: number }>) {

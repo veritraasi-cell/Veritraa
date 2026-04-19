@@ -8,7 +8,6 @@ import { getCurrentCustomerSession } from '@/lib/auth/customer-auth';
 import { listProductReviews } from '@/lib/customer-store';
 import { brochureDownloadHref } from '@/src/data/mockData';
 import { getCatalogProductBySlug } from '@/src/lib/catalog';
-import { isShopProductLive } from '@/src/lib/liveCatalog';
 import { getStorefrontProductByHandle } from '@/src/lib/shopifyStorefront';
 
 interface ProductPageProps {
@@ -49,24 +48,22 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   const product = await getCatalogProductBySlug(slug);
 
-  if (!product) {
+  if (!product || product.status !== 'ACTIVE' || product.isPushed === false) {
     notFound();
   }
 
-  const isLive = await isShopProductLive(slug);
-  if (!isLive) {
-    notFound();
-  }
-
-  const storefrontLookup = await getStorefrontProductByHandle(product.shopifyHandle ?? product.slug)
-    .then((value) => ({ storefrontProduct: value, storefrontError: null as string | null }))
-    .catch((error) => ({
-      storefrontProduct: null,
-      storefrontError: error instanceof Error ? error.message : 'Unknown Shopify Storefront error.',
-    }));
+  const [storefrontLookup, rawReviews] = await Promise.all([
+    getStorefrontProductByHandle(product.shopifyHandle ?? product.slug)
+      .then((value) => ({ storefrontProduct: value, storefrontError: null as string | null }))
+      .catch((error) => ({
+        storefrontProduct: null,
+        storefrontError: error instanceof Error ? error.message : 'Unknown Shopify Storefront error.',
+      })),
+    listProductReviews(slug),
+  ]);
 
   const { storefrontProduct, storefrontError } = storefrontLookup;
-  const reviews = (await listProductReviews(slug)).map((review) => ({
+  const reviews = rawReviews.map((review) => ({
     id: review.id,
     customerName: review.customerName,
     rating: review.rating,
