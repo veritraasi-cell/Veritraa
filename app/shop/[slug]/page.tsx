@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import CustomerAccessGate from '@/components/site/CustomerAccessGate';
 import ProductDetailTemplate from '@/components/site/ProductDetailTemplate';
 import ProductReviewsPanel from '@/components/site/ProductReviewsPanel';
 import { getCurrentCustomerSession } from '@/lib/auth/customer-auth';
@@ -37,15 +36,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const cookieStore = await cookies();
   const authenticatedCustomerSession = await getCurrentCustomerSession(cookieStore);
 
-  if (!authenticatedCustomerSession) {
-    return (
-      <CustomerAccessGate
-        description="This product page stays locked until you sign in with Google. That keeps the shop, cart, comments, likes, and order history attached to authenticated Firebase users only."
-        title="Login to view this product"
-      />
-    );
-  }
-
   const product = await getCatalogProductBySlug(slug);
 
   if (!product || product.status !== 'ACTIVE' || product.isPushed === false) {
@@ -73,7 +63,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     adminReplyAt: review.adminReplyAt,
     createdAt: review.createdAt,
   }));
-  const publicSession = authenticatedCustomerSession.customer
+  const publicSession = authenticatedCustomerSession?.customer
     ? {
         id: authenticatedCustomerSession.customer.id,
         email: authenticatedCustomerSession.customer.email,

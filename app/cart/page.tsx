@@ -10,8 +10,8 @@ export default async function CartPage() {
   if (!session) {
     return (
       <CustomerAccessGate
-        description="The cart is protected by Google login. Sign in first, then you can add products, update quantities, and proceed to Shopify checkout."
-        title="Login to open your cart"
+        description="Sign in to access your saved cart, update quantities, and continue to checkout."
+        title="Sign in to open your cart"
       />
     );
   }

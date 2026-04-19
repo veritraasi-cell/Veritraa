@@ -16,7 +16,7 @@ function unauthorizedResponse() {
   );
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const headers = new Headers(request.headers);
   headers.set('x-admin-path', pathname);

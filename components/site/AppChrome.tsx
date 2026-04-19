@@ -19,8 +19,8 @@ export default function AppChrome({ children }: Readonly<{ children: ReactNode }
   return (
     <FirebaseAuthProvider>
       <CartProvider>
-        <Navbar />
-        <main className={`content-frame min-h-screen ${isHomeRoute ? 'pt-0' : 'pt-[72px] sm:pt-[78px] md:pt-[92px]'}`}>
+        <Navbar key={pathname ?? 'site'} />
+        <main className={`content-frame min-h-screen ${isHomeRoute ? 'pt-0' : 'pt-[96px] sm:pt-[104px] md:pt-[92px]'}`}>
           {children}
         </main>
         <SiteFooter />

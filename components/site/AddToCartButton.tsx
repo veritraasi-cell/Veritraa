@@ -1,9 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Minus, Plus, ShoppingBag, X } from 'lucide-react';
+import { LoaderCircle, Minus, Plus, ShoppingBag, X } from 'lucide-react';
 import { useCart } from '@/components/site/CartProvider';
 import { useFirebaseCustomerAuth } from '@/components/site/FirebaseAuthProvider';
 import type { StorefrontCart } from '@/components/site/cart-types';
@@ -124,7 +123,9 @@ export default function AddToCartButton({
             >
               <Minus size={18} />
             </button>
-            <span className="min-w-7 text-center text-sm font-bold text-[#4f1d0c]">{quantity}</span>
+            <span className="flex min-w-7 justify-center text-center text-sm font-bold text-[#4f1d0c]">
+              {busy ? <LoaderCircle className="h-4 w-4 animate-spin text-[#8f350f]" /> : quantity}
+            </span>
             <button
               className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#8f350f] text-white transition hover:bg-[#6f2507] disabled:cursor-not-allowed disabled:opacity-60"
               disabled={disabled || busy}
@@ -145,7 +146,7 @@ export default function AddToCartButton({
             }}
             type="button"
           >
-            <ShoppingBag size={18} />
+            {busy ? <LoaderCircle className="h-[18px] w-[18px] animate-spin" /> : <ShoppingBag size={18} />}
             {busy ? 'Adding...' : 'Add to Cart'}
           </button>
         )}
@@ -161,9 +162,7 @@ export default function AddToCartButton({
                 </div>
               ) : null}
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-[#4f1d0c]">
-                  ✅ {toast.quantity} × {toast.productName} added to cart
-                </p>
+                <p className="text-sm font-semibold text-[#4f1d0c]">Added: {toast.quantity} x {toast.productName}</p>
               </div>
               <button
                 aria-label="Dismiss notification"

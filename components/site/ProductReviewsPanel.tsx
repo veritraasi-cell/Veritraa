@@ -38,7 +38,7 @@ export default function ProductReviewsPanel({
     rating: '5',
     comment: '',
   });
-  const { openAuthDialog, logout: logoutCustomer } = useFirebaseCustomerAuth();
+  const { openAuthDialog } = useFirebaseCustomerAuth();
 
   useEffect(() => {
     setReviews(initialReviews);
@@ -74,8 +74,10 @@ export default function ProductReviewsPanel({
         throw new Error(payload.error ?? 'Unable to post review.');
       }
 
-      if (payload.data?.review) {
-        setReviews((current) => [payload.data!.review, ...current]);
+      const nextReview = payload.data?.review;
+
+      if (nextReview) {
+        setReviews((current) => [nextReview, ...current]);
       }
 
       setReviewForm({
@@ -96,35 +98,32 @@ export default function ProductReviewsPanel({
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#99461e]">Customer reviews</p>
         <h3 className="font-headline text-3xl text-[#1d1c18]">Comments and ratings</h3>
         <p className="text-sm leading-6 text-[#55433b]">
-          Ratings, comments, likes, and order details are stored in Firebase and linked to the authenticated customer
-          profile.
+          Read what other customers are saying, and sign in when you want to add your own comment.
         </p>
       </div>
 
       {notice ? (
-        <div className="mt-4 rounded-2xl border border-[#ead7c4] bg-[#fff8ef] px-4 py-3 text-sm text-[#6f4b3f]">{notice}</div>
+        <div className="mt-4 rounded-2xl border border-[#ead7c4] bg-[#fff8ef] px-4 py-3 text-sm text-[#6f4b3f]">
+          {notice}
+        </div>
       ) : null}
 
       {!session ? (
         <div className="mt-6 rounded-[1.5rem] border border-[#ead7c4] bg-[#fffaf4] p-5 text-sm leading-6 text-[#55433b]">
-          Review comments are locked until login. Use the Google login popup from the header, then come back here to post.
+          <p>Browse all comments freely. Sign in when you are ready to write and submit your own review.</p>
+          <button
+            type="button"
+            onClick={openAuthDialog}
+            className="mt-4 rounded-full bg-[#8a3a17] px-4 py-2 text-sm font-semibold text-white"
+          >
+            Sign in to comment
+          </button>
         </div>
       ) : (
         <div className="mt-6 rounded-[1.5rem] border border-[#ead7c4] bg-[#fffaf4] p-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-[#1d1c18]">{session.name}</p>
-              <p className="text-xs text-[#7f5a4a]">{session.email}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                void logoutCustomer();
-              }}
-              className="rounded-full border border-[#d8a36f] bg-white px-4 py-2 text-sm font-semibold text-[#8a3a17]"
-            >
-              Logout
-            </button>
+          <div className="rounded-2xl border border-[#e6cdb3] bg-white/80 px-4 py-3">
+            <p className="text-sm font-semibold text-[#1d1c18]">Posting as {session.name}</p>
+            <p className="mt-1 text-xs text-[#7f5a4a]">Your comment will appear publicly with your name.</p>
           </div>
           <div className="mt-4 grid gap-3">
             <select
@@ -166,7 +165,7 @@ export default function ProductReviewsPanel({
                 <div>
                   <p className="font-semibold text-[#1d1c18]">{review.customerName}</p>
                 </div>
-                <p className="text-sm font-semibold text-[#99461e]">{'★'.repeat(review.rating)}</p>
+                <p className="text-sm font-semibold text-[#99461e]">{'\u2605'.repeat(review.rating)}</p>
               </div>
               <p className="mt-3 text-sm leading-6 text-[#55433b]">{review.comment}</p>
               {review.adminReply ? (

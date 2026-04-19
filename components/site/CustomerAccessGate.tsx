@@ -17,7 +17,7 @@ export default function CustomerAccessGate({
       <div className="relative overflow-hidden rounded-[2.25rem] border border-[#e2c8b4]/75 bg-[linear-gradient(180deg,#fff9f2,#fff1df)] p-8 shadow-[0_24px_60px_-38px_rgba(82,28,4,0.55)] sm:p-10">
         <div className="inline-flex items-center gap-2 rounded-full border border-[#f2c69c] bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-[#99461e]">
           <LockKeyhole size={14} />
-          Login required
+          Sign-in required
         </div>
 
         <h1 className="mt-5 font-headline text-4xl text-[#1d1c18] sm:text-5xl">{title}</h1>
@@ -36,10 +36,10 @@ export default function CustomerAccessGate({
             type="button"
           >
             <Sparkles size={16} />
-            Open Google login
+            Continue with Google
           </button>
           <span className="text-xs uppercase tracking-[0.18em] text-[#7f5a4a]">
-            Shopping, comments, likes, and order history stay locked until sign-in.
+            Your cart and account activity stay linked once you sign in.
           </span>
         </div>
       </div>

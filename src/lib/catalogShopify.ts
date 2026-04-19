@@ -4,11 +4,11 @@ import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
 import { listProductsWithDetails } from '@/lib/shopify/queries/products';
 import type { ShopifyCatalogProduct, ShopifyProductVariant } from '@/lib/shopify/types';
-import { shopCategories, type ShopProduct } from '@/src/data/mockData';
+import { shopCategories, shopProducts, type ShopProduct } from '@/src/data/mockData';
 
 export type ManagedCatalogProduct = ShopProduct & {
   id: string;
-  source?: 'shopify';
+  source?: 'shopify' | 'local';
   status: 'ACTIVE' | 'DRAFT' | 'ARCHIVED';
   vendor: string;
   productType: string;
@@ -76,6 +76,36 @@ function getWeightLabel(variant: ShopifyProductVariant) {
   return variant.selectedOptions.find((option) => option.name.toLowerCase() === 'weight')?.value ?? variant.title;
 }
 
+const loggedCatalogFallbackMessages = new Set<string>();
+
+function logShopifyCatalogFallback(scope: string, error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  const cacheKey = `${scope}:${message}`;
+
+  if (loggedCatalogFallbackMessages.has(cacheKey)) {
+    return;
+  }
+
+  loggedCatalogFallbackMessages.add(cacheKey);
+  console.warn(`Shopify catalog unavailable for ${scope}; using local catalog fallback. ${message}`);
+}
+
+function inferLocalProductType(product: ShopProduct) {
+  if (product.productType?.trim()) {
+    return product.productType.trim();
+  }
+
+  if (product.categoryName?.trim() && product.categoryName !== 'All Collections') {
+    return product.categoryName.trim();
+  }
+
+  if (product.name.toLowerCase().includes('chutney')) {
+    return 'Relishes & Chutneys';
+  }
+
+  return 'Herbs & Spices';
+}
+
 function buildManagedCatalogProductFromShopify(product: ShopifyCatalogProduct): ManagedCatalogProduct {
   const variants = product.variants ?? [];
   const normalizedVariants = variants.map((variant) => ({
@@ -113,22 +143,62 @@ function buildManagedCatalogProductFromShopify(product: ShopifyCatalogProduct): 
   };
 }
 
-async function listAllShopifyProductsWithDetails(options?: { query?: string | null }) {
-  try {
-    const products: ShopifyCatalogProduct[] = [];
-    let after: string | null = null;
+function buildManagedCatalogProductFromLocal(product: ShopProduct): ManagedCatalogProduct {
+  const variantDefinitions =
+    product.variantDefinitions?.length
+      ? product.variantDefinitions.map((variant) => ({
+          label: variant.label,
+          price: variant.price,
+          quantity: variant.quantity,
+        }))
+      : product.sizes.map((size) => ({
+          label: size,
+          price: product.price ?? '0.00',
+          quantity: product.quantity ?? 20,
+        }));
+  const primaryVariant = variantDefinitions[0];
+  const productType = inferLocalProductType(product);
 
-    do {
-      const page = await listProductsWithDetails({ first: 100, after, query: options?.query ?? null });
-      products.push(...page.nodes);
-      after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
-    } while (after);
+  return {
+    ...product,
+    id: `local:${product.shopifyHandle ?? product.slug}`,
+    source: 'local',
+    shopifyHandle: product.shopifyHandle ?? product.slug,
+    vendor: product.vendor?.trim() || 'Veritraa Enterprises',
+    productType,
+    categoryName: product.categoryName?.trim() || productType,
+    tags: dedupeList(product.tags ?? ['veritraa', 'masala', product.slug]),
+    price: product.price ?? primaryVariant?.price ?? '0.00',
+    quantity: product.quantity ?? primaryVariant?.quantity ?? 20,
+    variantDefinitions,
+    imageAlt: product.imageAlt?.trim() || product.name,
+    descriptionHtml: product.descriptionHtml?.trim() || undefined,
+    status: 'ACTIVE',
+    isPushed: true,
+  };
+}
 
-    return products;
-  } catch (error) {
-    console.error('Error fetching Shopify products:', error instanceof Error ? error.message : String(error));
-    return [];
+function getFallbackCatalogProducts(options?: { liveOnly?: boolean }) {
+  const products = shopProducts.map((product) => buildManagedCatalogProductFromLocal(product));
+
+  if (options?.liveOnly) {
+    return products.filter((product) => product.status === 'ACTIVE' && product.isPushed !== false);
   }
+
+  return products;
+}
+
+async function listAllShopifyProductsWithDetails(options?: { query?: string | null }) {
+  const products: ShopifyCatalogProduct[] = [];
+  let after: string | null = null;
+
+  do {
+    const page = await listProductsWithDetails({ first: 100, after, query: options?.query ?? null });
+    products.push(...page.nodes);
+    after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
+  } while (after);
+
+  return products;
 }
 
 const getCachedCatalogProducts = unstable_cache(
@@ -137,8 +207,8 @@ const getCachedCatalogProducts = unstable_cache(
       const products = await listAllShopifyProductsWithDetails();
       return products.map((product) => buildManagedCatalogProductFromShopify(product));
     } catch (error) {
-      console.error('Error building catalog products:', error instanceof Error ? error.message : String(error));
-      return [];
+      logShopifyCatalogFallback('catalog products', error);
+      return getFallbackCatalogProducts();
     }
   },
   ['shopify-catalog-products'],
@@ -151,8 +221,8 @@ const getCachedLiveCatalogProducts = unstable_cache(
       const products = await listAllShopifyProductsWithDetails({ query: 'status:active' });
       return products.map((product) => buildManagedCatalogProductFromShopify(product));
     } catch (error) {
-      console.error('Error building live catalog products:', error instanceof Error ? error.message : String(error));
-      return [];
+      logShopifyCatalogFallback('live catalog products', error);
+      return getFallbackCatalogProducts({ liveOnly: true });
     }
   },
   ['shopify-live-catalog-products'],
@@ -173,8 +243,12 @@ const getCachedCatalogProductBySlug = unstable_cache(
 
       return product ? buildManagedCatalogProductFromShopify(product) : null;
     } catch (error) {
-      console.error('Error resolving catalog product by slug:', error instanceof Error ? error.message : String(error));
-      return null;
+      logShopifyCatalogFallback(`catalog product "${normalizedSlug}"`, error);
+      return (
+        getFallbackCatalogProducts().find(
+          (product) => product.slug === normalizedSlug || product.shopifyHandle === normalizedSlug
+        ) ?? null
+      );
     }
   },
   ['shopify-catalog-product-by-slug'],

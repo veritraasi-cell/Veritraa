@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@veritraa.in');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -85,7 +85,7 @@ export default function AdminLoginPage() {
             </div>
 
             <p className="text-xs leading-5 text-[#755245]">
-              Demo credentials: <span className="font-semibold">admin@veritraa.in</span> / <span className="font-semibold">admin123456</span>
+              Authorized staff access only. Contact the site owner if you need admin credentials.
             </p>
           </CardContent>
         </Card>
@@ -105,7 +105,7 @@ export default function AdminLoginPage() {
                   autoComplete="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  placeholder="admin@veritraa.in"
+                  placeholder="Enter your admin email"
                 />
               </div>
 

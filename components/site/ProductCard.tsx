@@ -1,4 +1,9 @@
+'use client';
+
+import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
+import { LoaderCircle } from 'lucide-react';
 import type { FeaturedProduct, ShopProduct } from '@/src/data/mockData';
 
 interface ProductCardProps {
@@ -8,36 +13,14 @@ interface ProductCardProps {
   readonly compact?: boolean;
 }
 
-function renderStars(rating: FeaturedProduct['rating']) {
-  if (rating === 4.5) {
-    return (
-      <>
-        <span className="material-symbols-outlined text-sm text-tertiary">star</span>
-        <span className="material-symbols-outlined text-sm text-tertiary">star</span>
-        <span className="material-symbols-outlined text-sm text-tertiary">star</span>
-        <span className="material-symbols-outlined text-sm text-tertiary">star</span>
-        <span className="material-symbols-outlined text-sm text-tertiary">star_half</span>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <span className="material-symbols-outlined text-sm text-tertiary">star</span>
-      <span className="material-symbols-outlined text-sm text-tertiary">star</span>
-      <span className="material-symbols-outlined text-sm text-tertiary">star</span>
-      <span className="material-symbols-outlined text-sm text-tertiary">star</span>
-      <span className="material-symbols-outlined text-sm text-tertiary">star</span>
-    </>
-  );
-}
-
 export default function ProductCard({
   product,
   variant,
   href,
   compact = false,
 }: Readonly<ProductCardProps>) {
+  const [isNavigating, setIsNavigating] = useState(false);
+
   if (variant === 'featured') {
     const featuredProduct = product as FeaturedProduct;
 
@@ -45,11 +28,11 @@ export default function ProductCard({
       <div className="group w-full min-w-0">
         <div className="overflow-hidden rounded-[1.45rem] border border-[#d9b98e]/40 bg-gradient-to-b from-[#fffaf3] via-[#f8ecdd] to-[#efd6b6] shadow-[0_18px_36px_-30px_rgba(112,56,18,0.45)] transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_28px_50px_-26px_rgba(112,56,18,0.45)]">
           <div className="relative aspect-square">
-            <img
+            <Image
               alt={featuredProduct.name}
-              className="h-full w-full object-cover object-[center_16%] transition-transform duration-700 group-hover:scale-105"
-              decoding="async"
-              loading="lazy"
+              className="object-cover object-[center_16%] transition-transform duration-700 group-hover:scale-105"
+              fill
+              sizes="(min-width: 1024px) 25vw, 50vw"
               src={featuredProduct.image}
             />
             {featuredProduct.badge ? (
@@ -68,13 +51,15 @@ export default function ProductCard({
 
   const shopProduct = product as ShopProduct;
   const card = (
-    <div className={`group flex h-full flex-col overflow-hidden rounded-[1.45rem] border border-[#d9b98e]/55 bg-gradient-to-b from-[#fffaf3] via-[#f8ecdd] to-[#f0dcc3] shadow-[0_18px_36px_-28px_rgba(112,56,18,0.55)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_50px_-26px_rgba(112,56,18,0.55)] sm:rounded-[1.75rem] ${compact ? 'shadow-[0_12px_24px_-20px_rgba(112,56,18,0.5)]' : ''}`}>
+    <div
+      className={`group relative flex h-full flex-col overflow-hidden rounded-[1.45rem] border border-[#d9b98e]/55 bg-gradient-to-b from-[#fffaf3] via-[#f8ecdd] to-[#f0dcc3] shadow-[0_18px_36px_-28px_rgba(112,56,18,0.55)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_50px_-26px_rgba(112,56,18,0.55)] sm:rounded-[1.75rem] ${compact ? 'shadow-[0_12px_24px_-20px_rgba(112,56,18,0.5)]' : ''}`}
+    >
       <div className={`relative w-full overflow-hidden bg-[#f6ead7] ${compact ? 'aspect-[5/6]' : 'aspect-[5/6] sm:aspect-[5/6]'}`}>
-        <img
+        <Image
           alt={shopProduct.name}
-          className="h-full w-full object-cover object-[center_16%] transition-transform duration-700 group-hover:scale-105"
-          decoding="async"
-          loading="lazy"
+          className="object-cover object-[center_16%] transition-transform duration-700 group-hover:scale-105"
+          fill
+          sizes={compact ? '(min-width: 1024px) 14vw, 44vw' : '(min-width: 1024px) 20vw, 44vw'}
           src={shopProduct.image}
         />
         {shopProduct.tag ? (
@@ -91,12 +76,37 @@ export default function ProductCard({
           </h3>
         </div>
       </div>
+      {isNavigating ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[rgba(255,250,243,0.82)] backdrop-blur-[2px]" aria-hidden="true">
+          <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#d9b98e]/55 bg-white/95 text-[#8f350f] shadow-[0_18px_30px_-22px_rgba(112,56,18,0.6)]">
+            <LoaderCircle className="h-5 w-5 animate-spin" />
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 
   if (href) {
     return (
-      <Link aria-label={`View details for ${shopProduct.name}`} className="block h-full" href={href}>
+      <Link
+        aria-label={`View details for ${shopProduct.name}`}
+        className="block h-full"
+        href={href}
+        onClick={(event) => {
+          if (
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+          ) {
+            return;
+          }
+
+          setIsNavigating(true);
+        }}
+      >
         {card}
       </Link>
     );
