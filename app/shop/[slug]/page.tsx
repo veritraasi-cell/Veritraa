@@ -66,7 +66,21 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     }));
 
   const { storefrontProduct, storefrontError } = storefrontLookup;
-  const reviews = await listProductReviews(slug);
+  const reviews = (await listProductReviews(slug)).map((review) => ({
+    id: review.id,
+    customerName: review.customerName,
+    rating: review.rating,
+    comment: review.comment,
+    createdAt: review.createdAt,
+  }));
+  const publicSession = authenticatedCustomerSession.customer
+    ? {
+        id: authenticatedCustomerSession.customer.id,
+        email: authenticatedCustomerSession.customer.email,
+        name: authenticatedCustomerSession.customer.name,
+        photoURL: authenticatedCustomerSession.customer.photoURL,
+      }
+    : null;
 
   return (
     <>
@@ -89,7 +103,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         <ProductReviewsPanel
           productSlug={slug}
           initialReviews={reviews}
-          initialSession={authenticatedCustomerSession.customer ?? null}
+          initialSession={publicSession}
         />
       </div>
     </>

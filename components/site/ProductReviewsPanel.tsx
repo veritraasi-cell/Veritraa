@@ -7,14 +7,12 @@ type CustomerSession = {
   id: string;
   email: string;
   name: string;
-  phone: string | null;
   photoURL?: string | null;
 };
 
 type ProductReview = {
   id: string;
   customerName: string;
-  customerPhone: string | null;
   rating: number;
   comment: string;
   createdAt: string | Date;
@@ -95,8 +93,8 @@ export default function ProductReviewsPanel({
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#99461e]">Customer reviews</p>
         <h3 className="font-headline text-3xl text-[#1d1c18]">Comments and ratings</h3>
         <p className="text-sm leading-6 text-[#55433b]">
-          Ratings, comments, likes, customer phone numbers, and order details are stored in Firebase and linked to the
-          authenticated customer profile.
+          Ratings, comments, likes, and order details are stored in Firebase and linked to the authenticated customer
+          profile.
         </p>
       </div>
 
@@ -113,9 +111,7 @@ export default function ProductReviewsPanel({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-[#1d1c18]">{session.name}</p>
-              <p className="text-xs text-[#7f5a4a]">
-                {session.email} {session.phone ? `| ${session.phone}` : ''}
-              </p>
+              <p className="text-xs text-[#7f5a4a]">{session.email}</p>
             </div>
             <button
               type="button"
@@ -166,7 +162,6 @@ export default function ProductReviewsPanel({
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="font-semibold text-[#1d1c18]">{review.customerName}</p>
-                  <p className="text-xs text-[#7f5a4a]">{review.customerPhone}</p>
                 </div>
                 <p className="text-sm font-semibold text-[#99461e]">{'★'.repeat(review.rating)}</p>
               </div>

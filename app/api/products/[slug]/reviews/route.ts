@@ -3,6 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentCustomerSession } from '@/lib/auth/customer-auth';
 import { createProductReview, listProductReviews } from '@/lib/customer-store';
 
+function toPublicReview(review: Awaited<ReturnType<typeof createProductReview>>) {
+  return {
+    id: review.id,
+    customerName: review.customerName,
+    rating: review.rating,
+    comment: review.comment,
+    createdAt: review.createdAt,
+  };
+}
+
 type RouteContext = {
   params: Promise<{
     slug: string;
@@ -18,7 +28,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, error: 'Please log in before viewing reviews.' }, { status: 401 });
   }
 
-  const reviews = await listProductReviews(slug);
+  const reviews = (await listProductReviews(slug)).map(toPublicReview);
   return NextResponse.json({ ok: true, data: { reviews } });
 }
 
@@ -47,5 +57,5 @@ export async function POST(request: NextRequest, context: RouteContext) {
     comment: body.comment.trim(),
   });
 
-  return NextResponse.json({ ok: true, data: { review } });
+  return NextResponse.json({ ok: true, data: { review: toPublicReview(review) } });
 }
