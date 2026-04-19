@@ -41,7 +41,7 @@ export default function ReviewModerationPanel({
   initialReviews: ReviewModerationRecord[];
 }>) {
   const [reviews, setReviews] = useState(initialReviews);
-  const [selectedReviewId, setSelectedReviewId] = useState(initialReviews[0]?.id ?? null);
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(initialReviews[0]?.id ?? null);
   const [replyDraft, setReplyDraft] = useState(initialReviews[0]?.adminReply ?? '');
   const [search, setSearch] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
