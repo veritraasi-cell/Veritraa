@@ -87,7 +87,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="absolute left-1/2 top-3 transform -translate-x-1/2 w-[92%] z-[1000] select-none px-3 pt-3 md:static md:inset-auto md:transform-none md:mx-0 md:w-auto md:top-0 md:translate-x-0 md:fixed md:inset-x-0 md:top-0 md:border-b md:border-outline-variant/30 md:bg-[rgba(255,251,247,0.96)] md:px-0 md:pt-0 md:shadow-[0_10px_30px_-24px_rgba(26,28,26,0.26)] md:[backdrop-filter:blur(14px)]">
+    <nav className="sticky top-3 z-[1000] w-full mx-auto select-none px-3 pt-3 md:static md:inset-auto md:transform-none md:mx-0 md:w-auto md:top-0 md:translate-x-0 md:fixed md:inset-x-0 md:top-0 md:border-b md:border-outline-variant/30 md:bg-[rgba(255,251,247,0.96)] md:px-0 md:pt-0 md:shadow-[0_10px_30px_-24px_rgba(26,28,26,0.26)] md:[backdrop-filter:blur(14px)]">
       <div className="mx-auto max-w-screen-2xl">
         <div className={cx('relative md:rounded-none md:border-none md:bg-transparent md:shadow-none md:backdrop-blur-none', styles.mobileShell)}>
           <div className={cx('pointer-events-none absolute inset-0 md:hidden', styles.mobileShellGlow)} />
