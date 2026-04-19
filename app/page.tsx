@@ -80,31 +80,57 @@ export default async function HomePage() {
       </section>
 
       <section className="story-surface mx-2 rounded-3xl px-4 py-10 sm:mx-4 sm:px-6 sm:py-14 md:mx-6 md:px-8 md:py-20">
-        <div className="mx-auto grid max-w-screen-2xl grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-8 xl:gap-12">
-          {homeBenefits.map((benefit) => {
-            const accentClass =
-              benefit.accent === 'secondary'
-                ? 'bg-secondary-container text-on-secondary-container'
-                : benefit.accent === 'primary'
-                  ? 'bg-primary-container text-on-primary-container'
-                  : 'bg-tertiary-container text-on-tertiary-container';
-            const BenefitIcon = benefitIcons[benefit.title as keyof typeof benefitIcons];
+        <div className="mx-auto max-w-screen-2xl">
+          {/* Mobile: horizontal scroller */}
+          <div className="-mx-4 md:hidden">
+            <div className="no-scrollbar flex gap-3 overflow-x-auto px-4">
+              {homeBenefits.map((benefit) => {
+                const accentClass =
+                  benefit.accent === 'secondary'
+                    ? 'bg-secondary-container text-on-secondary-container'
+                    : benefit.accent === 'primary'
+                      ? 'bg-primary-container text-on-primary-container'
+                      : 'bg-tertiary-container text-on-tertiary-container';
+                const BenefitIcon = benefitIcons[benefit.title as keyof typeof benefitIcons];
 
-            return (
-              <div
-                key={benefit.title}
-                className="flex flex-col items-center gap-3 rounded-2xl border border-white/55 bg-white/72 px-4 py-5 text-center shadow-[0_18px_40px_-34px_rgba(82,28,4,0.32)] backdrop-blur-sm sm:gap-4 sm:rounded-3xl sm:px-6 sm:py-8"
-              >
-                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm sm:h-16 sm:w-16 ${accentClass}`}>
-                  <BenefitIcon className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.2} />
+                return (
+                  <div key={benefit.title} className="min-w-[78%] flex-shrink-0 flex flex-col items-center gap-3 rounded-2xl border border-white/55 bg-white/72 px-4 py-5 text-center shadow-[0_18px_40px_-34px_rgba(82,28,4,0.32)] backdrop-blur-sm">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${accentClass}`}>
+                      <BenefitIcon className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.2} />
+                    </div>
+                    <h4 className="font-headline text-base sm:text-xl">{benefit.title}</h4>
+                    <p className="max-w-xs text-sm leading-6 text-on-surface-variant sm:text-base">{benefit.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop/tablet: grid */}
+          <div className="hidden md:grid md:grid-cols-3 md:gap-8 xl:gap-12">
+            {homeBenefits.map((benefit) => {
+              const accentClass =
+                benefit.accent === 'secondary'
+                  ? 'bg-secondary-container text-on-secondary-container'
+                  : benefit.accent === 'primary'
+                    ? 'bg-primary-container text-on-primary-container'
+                    : 'bg-tertiary-container text-on-tertiary-container';
+              const BenefitIcon = benefitIcons[benefit.title as keyof typeof benefitIcons];
+
+              return (
+                <div
+                  key={benefit.title}
+                  className="flex flex-col items-center gap-3 rounded-2xl border border-white/55 bg-white/72 px-4 py-5 text-center shadow-[0_18px_40px_-34px_rgba(82,28,4,0.32)] backdrop-blur-sm sm:gap-4 sm:rounded-3xl sm:px-6 sm:py-8"
+                >
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm sm:h-16 sm:w-16 ${accentClass}`}>
+                    <BenefitIcon className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.2} />
+                  </div>
+                  <h4 className="font-headline text-base sm:text-xl">{benefit.title}</h4>
+                  <p className="max-w-xs text-sm leading-6 text-on-surface-variant sm:text-base">{benefit.description}</p>
                 </div>
-                <h4 className="font-headline text-base sm:text-xl">{benefit.title}</h4>
-                <p className="max-w-xs text-sm leading-6 text-on-surface-variant sm:text-base">
-                  {benefit.description}
-                </p>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -336,25 +362,52 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3 md:gap-6">
-            {testimonials.map((testimonial) => (
-              <article
-                key={testimonial.name}
-                className={`overflow-hidden rounded-[1.5rem] border border-[#dcc8b8]/75 bg-[linear-gradient(180deg,rgba(255,251,245,0.95),rgba(246,232,214,0.92))] p-6 shadow-[0_18px_40px_-34px_rgba(92,31,16,0.45)] sm:p-7 ${testimonial.featured ? 'md:-mt-2 md:scale-[1.02] md:shadow-[0_24px_54px_-34px_rgba(92,31,16,0.58)]' : ''}`}
-              >
-                <MessageSquareQuote className="h-7 w-7 text-[#a04100]/55" strokeWidth={1.8} />
-                <p className="mt-4 text-sm leading-7 text-[#4d3328] sm:text-base">{`“${testimonial.quote}”`}</p>
-                <div className="mt-6 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#ead7c8] font-bold text-[#7f2f12]">
-                    {testimonial.initial}
+          <div>
+            {/* Mobile: horizontal slider */}
+            <div className="-mx-4 md:hidden">
+              <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-4">
+                {testimonials.map((testimonial) => (
+                  <article
+                    key={testimonial.name}
+                    className={`min-w-[84%] snap-center overflow-hidden rounded-[1.5rem] border border-[#dcc8b8]/75 bg-[linear-gradient(180deg,rgba(255,251,245,0.95),rgba(246,232,214,0.92))] p-6 shadow-[0_18px_40px_-34px_rgba(92,31,16,0.45)] sm:p-7 ${testimonial.featured ? 'md:-mt-2 md:scale-[1.02] md:shadow-[0_24px_54px_-34px_rgba(92,31,16,0.58)]' : ''}`}
+                  >
+                    <MessageSquareQuote className="h-7 w-7 text-[#a04100]/55" strokeWidth={1.8} />
+                    <p className="mt-4 text-sm leading-7 text-[#4d3328] sm:text-base">{`“${testimonial.quote}”`}</p>
+                    <div className="mt-6 flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#ead7c8] font-bold text-[#7f2f12]">
+                        {testimonial.initial}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#4f1d0c]">{testimonial.name}</p>
+                        <p className="text-xs text-[#7f5a4a]">{testimonial.role}</p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop/tablet grid */}
+            <div className="hidden md:grid gap-4 md:grid-cols-3 md:gap-6">
+              {testimonials.map((testimonial) => (
+                <article
+                  key={testimonial.name}
+                  className={`overflow-hidden rounded-[1.5rem] border border-[#dcc8b8]/75 bg-[linear-gradient(180deg,rgba(255,251,245,0.95),rgba(246,232,214,0.92))] p-6 shadow-[0_18px_40px_-34px_rgba(92,31,16,0.45)] sm:p-7 ${testimonial.featured ? 'md:-mt-2 md:scale-[1.02] md:shadow-[0_24px_54px_-34px_rgba(92,31,16,0.58)]' : ''}`}
+                >
+                  <MessageSquareQuote className="h-7 w-7 text-[#a04100]/55" strokeWidth={1.8} />
+                  <p className="mt-4 text-sm leading-7 text-[#4d3328] sm:text-base">{`“${testimonial.quote}”`}</p>
+                  <div className="mt-6 flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#ead7c8] font-bold text-[#7f2f12]">
+                      {testimonial.initial}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#4f1d0c]">{testimonial.name}</p>
+                      <p className="text-xs text-[#7f5a4a]">{testimonial.role}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#4f1d0c]">{testimonial.name}</p>
-                    <p className="text-xs text-[#7f5a4a]">{testimonial.role}</p>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </section>
