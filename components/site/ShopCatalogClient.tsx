@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import ProductCard from '@/components/site/ProductCard';
 import type { ShopProduct } from '@/src/data/mockData';
@@ -13,7 +13,13 @@ export default function ShopCatalogClient({
   products: ShopProduct[];
   categories: string[];
 }>) {
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    setQuery(searchParams.get('query') ?? '');
+  }, [searchParams]);
+
   const normalizedQuery = query.trim().toLowerCase();
   const filteredProducts = products.filter((product) => {
     if (!normalizedQuery) {
@@ -63,9 +69,9 @@ export default function ShopCatalogClient({
           <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#d9bfa8]/55 bg-white/70 px-4 py-3 shadow-[0_12px_30px_-24px_rgba(112,56,18,0.45)] sm:mb-5 sm:px-5">
             <Search className="text-[#8f350f]" size={18} />
             <input
-              aria-label="Search masalas"
+              aria-label="Search products"
               className="w-full border-0 bg-transparent text-sm text-[#4b2616] outline-none placeholder:text-[#a77a5a] sm:text-base"
-              placeholder="Search masalas"
+              placeholder="Search products"
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -84,8 +90,8 @@ export default function ShopCatalogClient({
 
           {!filteredProducts.length ? (
             <div className="rounded-[1.6rem] border border-[#d9bfa8]/55 bg-white/75 px-6 py-12 text-center shadow-[0_18px_36px_-28px_rgba(112,56,18,0.2)]">
-              <p className="text-lg font-semibold text-[#4f1d0c]">No live Shopify products matched your search.</p>
-              <p className="mt-2 text-sm text-[#6a4637]">Push more draft products from the admin panel to expand the storefront.</p>
+              <p className="text-lg font-semibold text-[#4f1d0c]">No products found.</p>
+              <p className="mt-2 text-sm text-[#6a4637]">Try a different product name or clear the search to view the full catalog.</p>
             </div>
           ) : (
             <>

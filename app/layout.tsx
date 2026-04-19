@@ -19,7 +19,7 @@ const bodyFont = Manrope({
 export const metadata: Metadata = {
   title: 'Veritraa | The Sensory Heritage',
   description:
-    'Experience Veritraa through a refined storefront for heritage Indian masalas, exports, and store discovery.',
+    'Experience Veritraa through a refined storefront for heritage Indian masalas and store discovery.',
 };
 
 export default function RootLayout({

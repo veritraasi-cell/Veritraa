@@ -95,7 +95,6 @@ export const brochureDownloadHref = '/brochures/Veritraa-Brochure-1-Final.pdf';
 export const navLinks: ReadonlyArray<NavLink> = [
   { label: 'Home', href: '/' },
   { label: 'Shop', href: '/shop' },
-  { label: 'Exports', href: '/exports' },
 ];
 
 export const homeCollections: ReadonlyArray<CollectionItem> = [
@@ -410,20 +409,19 @@ export const bulkOptions: ReadonlyArray<BulkOption> = [
 export const footerQuickLinks: ReadonlyArray<FooterLink> = [
   { label: 'Home', href: '/' },
   { label: 'Shop All', href: '/shop' },
-  { label: 'Exports', href: '/exports' },
 ];
 
 export const footerHelpLinks: ReadonlyArray<FooterLink> = [
   { label: 'Shipping Policy', href: '#' },
   { label: 'Returns & Refunds', href: '#' },
-  { label: 'Contact Us', href: '/exports#enquiry' },
+  { label: 'Contact Us', href: 'mailto:veritraa.si@gmail.com' },
   { label: 'FAQs', href: '#' },
 ];
 
 export const footerLinktreeLinks: ReadonlyArray<FooterLink> = [
   { label: 'Instagram', href: '#' },
   { label: 'WhatsApp', href: '#' },
-  { label: 'Download Brochure', href: '/exports#brochure' },
+  { label: 'Download Brochure', href: '/brochures/Veritraa-Brochure-1-Final.pdf' },
   { label: 'Linktree', href: '#' },
 ];
 

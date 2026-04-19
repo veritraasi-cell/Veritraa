@@ -15,6 +15,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'via.placeholder.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
       ...(shopifyHostname
         ? [
             {
@@ -30,6 +34,10 @@ const nextConfig = {
     ],
   },
   async headers() {
+    if (process.env.NODE_ENV !== 'production') {
+      return [];
+    }
+
     return [
       {
         source: '/_next/static/:path*',

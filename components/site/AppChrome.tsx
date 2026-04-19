@@ -10,6 +10,7 @@ import { FirebaseAuthProvider } from '@/components/site/FirebaseAuthProvider';
 export default function AppChrome({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith('/admin');
+  const isHomeRoute = pathname === '/';
 
   if (isAdminRoute) {
     return <main className="min-h-screen bg-transparent pt-0">{children}</main>;
@@ -19,7 +20,9 @@ export default function AppChrome({ children }: Readonly<{ children: ReactNode }
     <FirebaseAuthProvider>
       <CartProvider>
         <Navbar />
-        <main className="content-frame min-h-screen pt-[72px] sm:pt-[78px] md:pt-[92px]">{children}</main>
+        <main className={`content-frame min-h-screen ${isHomeRoute ? 'pt-0' : 'pt-[72px] sm:pt-[78px] md:pt-[92px]'}`}>
+          {children}
+        </main>
         <SiteFooter />
       </CartProvider>
     </FirebaseAuthProvider>
