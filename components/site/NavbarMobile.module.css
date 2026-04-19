@@ -151,3 +151,32 @@
     -webkit-backdrop-filter: blur(24px);
   }
 }
+
+/* Mobile-only floating glass navbar override per design requirements */
+@media (max-width: 768px) {
+  .mobileShell {
+    position: absolute !important;
+    top: 12px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 92% !important;
+    background: transparent !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18) !important;
+    border-radius: 18px !important;
+    z-index: 1000 !important;
+    padding: 0.35rem;
+  }
+
+  .mobileShellGlow {
+    display: none !important;
+  }
+
+  /* Ensure action buttons remain visible on the translucent background */
+  .mobileActionButton,
+  .mobileActionButtonActive {
+    background: rgba(255,255,255,0.06) !important;
+  }
+}

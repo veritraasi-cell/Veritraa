@@ -174,7 +174,94 @@ export default function ProductReviewsPanel({
         </div>
       )}
 
-          <div className="mt-6 space-y-4">
+      {/* Mobile: horizontal sliding reviews + comment box */}
+      <div className="mt-6 md:hidden">
+        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4">
+          {session ? (
+            <div className="min-w-[84%] snap-center rounded-[1.35rem] border border-[#ead7c4] bg-[#fffaf4] p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: 5 }, (_, i) => {
+                    const value = i + 1;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        aria-label={`${value} star${value > 1 ? 's' : ''}`}
+                        onClick={() => setReviewForm((current) => ({ ...current, rating: String(value) }))}
+                        className={`text-2xl leading-none transition-colors ${
+                          Number(reviewForm.rating) >= value ? 'text-[#f6b66b]' : 'text-[#e6e1da]'
+                        }`}
+                      >
+                        {'\u2605'}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="text-sm text-[#7f5a4a]">{reviewForm.rating} star{Number(reviewForm.rating) > 1 ? 's' : ''}</div>
+              </div>
+              <textarea
+                className="mt-3 min-h-24 w-full rounded-2xl border border-[#dfc5ae] px-4 py-3 outline-none"
+                placeholder="Share your comment"
+                value={reviewForm.comment}
+                onChange={(event) => setReviewForm((current) => ({ ...current, comment: event.target.value }))}
+              />
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void submitReview();
+                  }}
+                  disabled={busy}
+                  className="rounded-2xl bg-[#8a3a17] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                >
+                  {busy ? 'Posting...' : 'Post review'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReviewForm({ rating: '5', comment: '' })}
+                  className="rounded-full border border-[#dfc5ae] px-3 py-2 text-sm text-[#7f5a4a]"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {reviews.length ? (
+            reviews.map((review) => (
+              <article key={review.id} className="min-w-[84%] snap-center rounded-[1.35rem] border border-[#ead7c4] bg-[#fffaf4] p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-[#f6b66b]">{Array.from({ length: 5 }, (_, i) => (
+                        <span key={i} className="text-sm">{i < review.rating ? '\u2605' : '\u2606'}</span>
+                      ))}</div>
+                      <div className="text-sm text-[#7f5a4a]">{review.customerName}</div>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-[#55433b]">{review.comment}</p>
+                {review.adminReply ? (
+                  <div className="mt-4 rounded-2xl border border-[#e6cdb3] bg-white px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8a3a17]">
+                      {review.adminReplyBy ? `${review.adminReplyBy} replied` : 'Owner reply'}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#55433b]">{review.adminReply}</p>
+                  </div>
+                ) : null}
+              </article>
+            ))
+          ) : (
+            <div className="min-w-[84%] snap-center rounded-[1.35rem] border border-[#ead7c4] bg-[#fffaf4] p-4 text-sm text-[#55433b]">
+              No comments or ratings yet for this product.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop/tablet: keep vertical list */}
+      <div className="mt-6 hidden md:block space-y-4">
         {reviews.length ? (
           reviews.map((review) => (
             <article key={review.id} className="rounded-[1.35rem] border border-[#ead7c4] bg-[#fffaf4] p-4">

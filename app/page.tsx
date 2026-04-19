@@ -38,13 +38,11 @@ export default async function HomePage() {
         <div className="mb-10 sm:mb-12 md:mb-16">
           <h2 className="font-headline text-2xl text-on-background sm:text-3xl md:text-4xl">Shop Our Signature Range</h2>
           <p className="mt-3 hidden text-sm text-on-surface-variant sm:block sm:text-base">Handpicked masalas and spice blends curated for modern kitchens</p>
-          <div className="mt-2 space-y-0.5 sm:hidden">
-            <p className="mobile-single-line text-[10px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">
-              Jeera | Haldi | Dhaniya | Garam
-            </p>
-            <p className="mobile-single-line text-[10px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">
-              Purity | Aroma | Handpicked
-            </p>
+          <div className="mt-2 sm:hidden -mx-4">
+            <div className="no-scrollbar flex w-full gap-3 overflow-x-auto px-4">
+              <p className="mobile-single-line inline-block text-[10px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant min-w-max">Jeera | Haldi | Dhaniya | Garam</p>
+              <p className="mobile-single-line inline-block text-[10px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant min-w-max">Purity | Aroma | Handpicked</p>
+            </div>
           </div>
           <div className="mt-4 h-1 w-24 rounded-full bg-primary" />
         </div>

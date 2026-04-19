@@ -17,14 +17,6 @@ export default function CartPageClient() {
   return (
     <div className="pb-16 pt-6 text-on-background sm:pb-20 sm:pt-8">
       <section className="mx-auto max-w-6xl px-4 sm:px-6 md:px-8">
-        <div className="rounded-[2rem] border border-[#e1cbb0]/70 bg-gradient-to-br from-[#fffaf5] via-[#fff6ef] to-[#f8ead9] p-6 shadow-[0_24px_56px_-40px_rgba(112,56,18,0.45)] sm:p-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#a04100]">Your cart</p>
-          <h1 className="mt-3 font-headline text-3xl tracking-tight text-[#4f1d0c] sm:text-5xl">Ready for checkout</h1>
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-[#6a4637] sm:text-base">
-            When you proceed to payment, we send you to Shopify’s hosted checkout. If Razorpay is enabled in your Shopify
-            store, it will appear there automatically as part of the checkout payment methods.
-          </p>
-        </div>
 
         {error ? (
           <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{error}</div>

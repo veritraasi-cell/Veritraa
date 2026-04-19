@@ -74,7 +74,7 @@ export default function AdminShell({
         />
 
         <aside
-          className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-[#e3c7ab] bg-[#fffaf4]/96 p-5 shadow-[0_24px_54px_-40px_rgba(63,28,16,0.55)] backdrop-blur transition-transform duration-300 lg:static lg:z-auto lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-[#e3c7ab] bg-[#fffaf4]/96 p-5 shadow-[0_24px_54px_-40px_rgba(63,28,16,0.55)] backdrop-blur transition-transform duration-300 lg:sticky lg:top-6 lg:z-auto lg:translate-x-0 ${
             mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
         >
@@ -93,6 +93,12 @@ export default function AdminShell({
               <X size={18} />
             </button>
           </div>
+          <Link
+            href="/"
+            className="mt-4 inline-flex items-center justify-center rounded-2xl border border-[#d8a36f] bg-white px-4 py-3 text-sm font-semibold text-[#8a3a17] transition hover:bg-[#f8ebdf]"
+          >
+            View storefront
+          </Link>
 
           <nav className="mt-6 flex-1 space-y-2 overflow-y-auto pr-1">
             {NAV_ITEMS.map((item) => {
@@ -125,13 +131,7 @@ export default function AdminShell({
             <p className="mt-1 text-sm font-semibold text-[#4b1f0f]">{activeItem.label}</p>
             <p className="mt-1 text-xs leading-5 text-[#7f5a4a]">Use the sidebar to move between store operations without losing context.</p>
           </div>
-
-          <Link
-            href="/"
-            className="mt-4 inline-flex items-center justify-center rounded-2xl border border-[#d8a36f] bg-white px-4 py-3 text-sm font-semibold text-[#8a3a17] transition hover:bg-[#f8ebdf]"
-          >
-            View storefront
-          </Link>
+         
         </aside>
 
         <div className="flex min-h-screen flex-col">

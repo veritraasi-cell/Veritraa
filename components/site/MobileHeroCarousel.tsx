@@ -29,8 +29,8 @@ export default function MobileHeroCarousel() {
   }, []);
 
   return (
-    <section className="mx-2 mt-4 overflow-hidden rounded-3xl sm:mx-4 md:hidden">
-      <div className="relative h-[78vh] min-h-[560px] max-h-[860px] overflow-hidden rounded-3xl bg-[#f2e2c4] shadow-[0_24px_70px_-40px_rgba(44,22,10,0.55)]">
+      <section className="mx-2 mt-4 overflow-hidden rounded-3xl sm:mx-4 md:hidden">
+        <div className="relative h-[78vh] min-h-[560px] max-h-[860px] overflow-hidden rounded-3xl bg-transparent md:bg-[#f2e2c4] shadow-[0_24px_70px_-40px_rgba(44,22,10,0.55)]">
         {slides.map((slide, index) => (
           <div
             key={'type' in slide ? 'hero-slide' : slide.src}
