@@ -121,13 +121,30 @@ export default function ProductReviewsPanel({
         </div>
       ) : (
         <div className="mt-6 rounded-[1.5rem] border border-[#ead7c4] bg-[#fffaf4] p-5">
-          <div className="rounded-2xl border border-[#e6cdb3] bg-white/80 px-4 py-3">
-            <p className="text-sm font-semibold text-[#1d1c18]">Posting as {session.name}</p>
-            <p className="mt-1 text-xs text-[#7f5a4a]">Your comment will appear publicly with your name.</p>
-          </div>
           <div className="mt-4 grid gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }, (_, i) => {
+                  const value = i + 1;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-label={`${value} star${value > 1 ? 's' : ''}`}
+                      onClick={() => setReviewForm((current) => ({ ...current, rating: String(value) }))}
+                      className={`text-2xl leading-none transition-colors ${
+                        Number(reviewForm.rating) >= value ? 'text-[#f6b66b]' : 'text-[#e6e1da]'
+                      }`}
+                    >
+                      {'\u2605'}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="text-sm text-[#7f5a4a]">{reviewForm.rating} star{Number(reviewForm.rating) > 1 ? 's' : ''}</div>
+            </div>
             <select
-              className="rounded-2xl border border-[#dfc5ae] px-4 py-3 outline-none"
+              className="sr-only"
               value={reviewForm.rating}
               onChange={(event) => setReviewForm((current) => ({ ...current, rating: event.target.value }))}
             >
@@ -157,15 +174,19 @@ export default function ProductReviewsPanel({
         </div>
       )}
 
-      <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-4">
         {reviews.length ? (
           reviews.map((review) => (
             <article key={review.id} className="rounded-[1.35rem] border border-[#ead7c4] bg-[#fffaf4] p-4">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-[#1d1c18]">{review.customerName}</p>
+                  <div className="flex items-center gap-2">
+                    <div className="text-[#f6b66b]">{Array.from({ length: 5 }, (_, i) => (
+                      <span key={i} className="text-sm">{i < review.rating ? '\u2605' : '\u2606'}</span>
+                    ))}</div>
+                    <div className="text-sm text-[#7f5a4a]">{review.customerName}</div>
+                  </div>
                 </div>
-                <p className="text-sm font-semibold text-[#99461e]">{'\u2605'.repeat(review.rating)}</p>
               </div>
               <p className="mt-3 text-sm leading-6 text-[#55433b]">{review.comment}</p>
               {review.adminReply ? (

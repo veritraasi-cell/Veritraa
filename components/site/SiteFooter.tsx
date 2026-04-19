@@ -62,6 +62,29 @@ export default function SiteFooter() {
             <Link href="#">Privacy</Link>
             <Link href="#">Terms</Link>
           </div>
+
+          <div className="mt-3 text-[11px] text-[#d9b43a] md:mt-4 md:text-sm">
+            <p className="text-sm text-[#fff7de]">
+              Crafted by{' '}
+              <a
+                href="https://www.linkedin.com/in/nishant-chaubey-9b3080313?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white"
+              >
+                Nishant Chaubey
+              </a>{' '}
+              and{' '}
+              <a
+                href="https://www.linkedin.com/in/yash-kumar-tripathi-998457306?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white"
+              >
+                Yash Tripathi
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

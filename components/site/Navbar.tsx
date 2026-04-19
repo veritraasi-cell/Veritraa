@@ -151,7 +151,7 @@ export default function Navbar() {
               >
                 <ShoppingBag size={20} />
                 {itemCount > 0 ? (
-                  <span className="absolute -right-2 -top-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white shadow-md">
+                  <span className="absolute -right-1.5 -top-2 z-50 flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-white shadow-md ring-1 ring-white/30">
                     {itemCount}
                   </span>
                 ) : null}
@@ -273,7 +273,7 @@ export default function Navbar() {
               >
                 <ShoppingBag size={18} />
                 {itemCount > 0 ? (
-                  <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white shadow-md">
+                  <span className="absolute -right-1.5 -top-1.5 z-50 flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-white shadow-md ring-1 ring-white/30">
                     {itemCount}
                   </span>
                 ) : null}
